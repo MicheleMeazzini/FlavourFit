@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @RestController
-@RequestMapping("api/v1/User")
+@RequestMapping("api/v1/user")
 public class UserController {
 
     private final UserService userService;
@@ -19,7 +19,7 @@ public class UserController {
         this.userService = userService;
     }
 
-    //Read All Users
+    // Read All Users
     @GetMapping ()
     public ResponseEntity<?> getUsers() {
         try {
@@ -27,11 +27,11 @@ public class UserController {
         }
         catch (Exception e) {
             String errorMessage = "Internal Server Error";
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorMessage);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e);
         }
     }
 
-    //Read User By Id
+    // Read User By Id
     @GetMapping ("/{id}")
     public ResponseEntity<?> getUserById(@PathVariable int id) {
         try {
@@ -40,22 +40,25 @@ public class UserController {
         catch (Exception e) {
             //return (List<User>) ResponseEntity.notFound().build();
             String errorMessage = "User not found";
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorMessage);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getStackTrace());
         }
     }
 
+    // Create a User
     @PostMapping ()
-    public void CreateUser() {
+    public void CreateUser(@RequestBody User utente) {
         return;
     }
 
+    // Update a user
     @PutMapping ()
     public void UpdateUser() {
         return;
     }
 
-    @DeleteMapping ()
-    public void DeleteUser() {
+    // Delete a user
+    @DeleteMapping ("/{id}")
+    public void DeleteUser(@PathVariable int id) {
         return;
     }
 }

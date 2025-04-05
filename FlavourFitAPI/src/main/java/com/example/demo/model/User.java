@@ -17,7 +17,7 @@ public class User {
     private String hashed_password;
     private String plain_password;
     private Date registration_date;
-    private boolean role;
+    private int role;
 
 
 }

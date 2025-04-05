@@ -1,22 +1,29 @@
 package com.example.demo.service;
 
 import com.example.demo.model.User;
+import com.example.demo.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
+
 import lombok.Data;
 
 @Service
 public class UserService {
+
+    private final UserRepository userRepository;
+
+    public UserService(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
+
     public List<User> GetAllUsers() throws Exception {
-        throw new Exception();
+        return userRepository.findAll();
         //return new ArrayList<User>();
     }
 
-    public User GetUserById(int id) throws Exception {
+    public Optional<User> GetUserById(int id) throws Exception {
+        /*
         if(id == 2)
             throw new Exception();
         User user = new User();
@@ -28,5 +35,7 @@ public class UserService {
         user.setRegistration_date(new Date());
         user.setRole(false);
         return user;
+        */
+         return userRepository.findById(id);
     }
 }
