@@ -1,4 +1,4 @@
 package com.example.demo.service;
 
-public class RecipeController {
+public class RecipeService {
 }
