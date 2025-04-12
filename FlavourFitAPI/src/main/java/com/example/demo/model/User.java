@@ -1,6 +1,7 @@
 package com.example.demo.model;
 
 import lombok.Data;
+import lombok.NonNull;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -11,7 +12,7 @@ import java.util.Date;
 public class User {
 
     @Id
-    private int _id;
+    private Integer _id;
     private String username;
     private String email;
     private String hashed_password;
