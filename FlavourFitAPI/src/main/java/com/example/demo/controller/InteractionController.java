@@ -20,7 +20,7 @@ public class InteractionController {
     }
 
     // Read All Interactions
-    @GetMapping
+    @GetMapping("/all")
     public ResponseEntity<?> getInteractions() {
         try {
             return ResponseEntity.ok(interactionService.getAllInteractions());
@@ -31,7 +31,7 @@ public class InteractionController {
     }
 
     // Read Interaction By Id
-    @GetMapping("/{id}")
+    @GetMapping("/id/{id}")
     public ResponseEntity<?> getInteractionById(@PathVariable int id) {
         try {
             return ResponseEntity.ok(interactionService.getInteractionById(id));
@@ -41,7 +41,8 @@ public class InteractionController {
         }
     }
 
-    @GetMapping("/{author}")
+    // Read Interaction By author name
+    @GetMapping("/author/{author}")
     public ResponseEntity<?> getInteractionByAuthor(@PathVariable String author) {
         try {
             return ResponseEntity.ok(interactionService.getInteractionByAuthor(author));
@@ -64,7 +65,7 @@ public class InteractionController {
     }
 
     // Update an Interaction
-    @PutMapping("/{id}")
+    @PutMapping("/id/{id}")
     public ResponseEntity<?> updateInteraction(@PathVariable int id, @RequestBody Interaction interaction) {
         try {
             interactionService.updateInteraction(id, interaction);
@@ -76,7 +77,7 @@ public class InteractionController {
     }
 
     // Delete an Interaction
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/id/{id}")
     public ResponseEntity<?> deleteInteraction(@PathVariable int id) {
         try {
             interactionService.deleteInteraction(id);
