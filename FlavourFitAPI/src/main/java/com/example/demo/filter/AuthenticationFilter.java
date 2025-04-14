@@ -28,29 +28,38 @@ public class AuthenticationFilter extends OncePerRequestFilter {
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
 
-        // filter only works for path beginning with "/api"
-        if (!request.getRequestURI().startsWith("/api")){
+        if (!request.getRequestURI().startsWith("/api")) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        if (request.getHeader("Auth") != null && request.getHeader("Auth").startsWith("Bearer ")) {
-            String token = request.getHeader("Auth").substring(7);
-            if (jwtUtil.isTokenExpired(token)) {
-                // Token expired or invalid
-                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED); // 401 Unauthorized
-                response.setContentType("application/json"); // Imposta il tipo di contenuto
-                response.getWriter().write("{\"message\": \"Unauthorized - Invalid or expired token\"}");
+        String header = request.getHeader("Auth");
+        if (header != null && header.startsWith("Bearer ")) {
+            String token = header.substring(7);
+
+            try {
+                if (jwtUtil.isTokenExpired(token)) {
+                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                    response.setContentType("application/json");
+                    response.getWriter().write("{\"message\": \"Unauthorized - Expired token\"}");
+                    return;
+                }
+
+
+            } catch (Exception e) {
+                // Invalid token
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.setContentType("application/json");
+                response.getWriter().write("{\"message\": \"Unauthorized - Invalid token\"}");
                 return;
             }
+
         } else {
-            // Missing Token
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED); // 401 Unauthorized
-            response.setContentType("application/json"); // Imposta il tipo di contenuto
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType("application/json");
             response.getWriter().write("{\"message\": \"Unauthorized - Missing token\"}");
             return;
         }
-
 
         filterChain.doFilter(request, response);
     }
