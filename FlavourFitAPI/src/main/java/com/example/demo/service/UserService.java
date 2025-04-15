@@ -68,6 +68,8 @@ public class UserService {
             return Enumerators.UserError.NO_ERROR;
         }
         catch (Exception e) {
+            System.out.println("Errore durante il salvataggio: " + e.getMessage());
+            e.printStackTrace();
             return Enumerators.UserError.GENERIC_ERROR;
         }
     }
