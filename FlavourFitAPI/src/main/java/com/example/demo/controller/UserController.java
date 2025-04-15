@@ -79,8 +79,6 @@ public class UserController {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorMessage("Generic error"));
             }
         }
-
-
     }
 
     // Update a user

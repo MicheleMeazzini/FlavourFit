@@ -61,14 +61,14 @@ public class UserService {
             return Enumerators.UserError.DUPLICATE_USERNAME;
 
         user.setRegistration_date(new Date());
-        if(user.getRole() == 0) // = 0 -> not specified in the body
-            user.setRole(1); // default user
+        if(user.getRole() == 0)
+            user.setRole(0); // default user
         try {
             userRepository.save(user);
             return Enumerators.UserError.NO_ERROR;
         }
         catch (Exception e) {
-            System.out.println("Errore durante il salvataggio: " + e.getMessage());
+            System.out.println("Error during saving: " + e.getMessage());
             e.printStackTrace();
             return Enumerators.UserError.GENERIC_ERROR;
         }
