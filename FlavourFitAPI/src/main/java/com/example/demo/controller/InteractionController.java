@@ -6,6 +6,7 @@ import com.example.demo.model.Interaction;
 import com.example.demo.model.User;
 import com.example.demo.service.InteractionService;
 import com.example.demo.utils.Enumerators;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -25,6 +26,7 @@ public class InteractionController {
 
     // Read All Interactions
     @GetMapping("/all")
+    @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> getInteractions() {
         try {
             return ResponseEntity.ok(interactionService.getAllInteractions());
@@ -36,6 +38,7 @@ public class InteractionController {
 
     // Read Interaction By Id
     @GetMapping("/id/{id}")
+    @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> getInteractionById(@PathVariable int id) {
         try {
             return ResponseEntity.ok(interactionService.getInteractionById(id));
@@ -47,6 +50,7 @@ public class InteractionController {
 
     // Read Interaction By author name
     @GetMapping("/author/{author}")
+    @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> getInteractionByAuthor(@PathVariable String author) {
         try {
             return ResponseEntity.ok(interactionService.getInteractionByAuthor(author));
@@ -58,6 +62,7 @@ public class InteractionController {
 
     // Create an Interaction
     @PostMapping ()
+    @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> CreateInteraction(@RequestBody Interaction interaction) throws Exception {
 
         //NO_ERROR, MISSING_REVIEW, MISSING_RATING, MISSING_AUTHOR, MISSING_USER_ID, MISSING_RECIPE_ID, INVALID_RATING, RECIPE_NOT_FOUND, USER_NOT_FOUND, GENERIC_ERROR
@@ -96,6 +101,7 @@ public class InteractionController {
 
     // Update an Interaction
     @PutMapping("/id/{id}")
+    @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> updateInteraction(@PathVariable int id, @RequestBody Interaction interaction) {
         try {
             interactionService.updateInteraction(id, interaction);
@@ -108,6 +114,7 @@ public class InteractionController {
 
     // Delete an Interaction
     @DeleteMapping("/id/{id}")
+    @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> deleteInteraction(@PathVariable int id) {
         try {
             interactionService.deleteInteraction(id);
