@@ -60,17 +60,16 @@ public class UserService {
         }
     }
 
-    // nella convenzione REST usando la PUT si specifica l'utente per intero eventualmente riscrivendo uguali i campi che non si vogliono cambiare
     public Enumerators.UserError UpdateUser(User user) throws Exception {
         Optional<User> exist = this.GetUserById(user.get_id());
         if(exist.isEmpty()){
             return Enumerators.UserError.USER_NOT_FOUND;
         }
 
-        if(!user.getEmail().equals(exist.get().getEmail())&& userRepository.existsByEmail(user.getEmail()))
+        if(!user.getEmail().equals(exist.get().getEmail()) && userRepository.existsByEmail(user.getEmail()))
             return Enumerators.UserError.DUPLICATE_EMAIL;
 
-        if(!user.getUsername().equals(exist.get().getUsername())&& userRepository.existsByUsername(user.getUsername()))
+        if(!user.getUsername().equals(exist.get().getUsername()) && userRepository.existsByUsername(user.getUsername()))
             return Enumerators.UserError.DUPLICATE_USERNAME;
 
         try {
@@ -83,7 +82,6 @@ public class UserService {
         }
     }
 
-    // nella convenzione REST usando la PATCH si specificano solo i cambi che si vogliono cambiare !
     public Enumerators.UserError UpdateUser(int id, Map<String, Object> params) throws Exception {
         Optional<User> user = this.GetUserById(id);
         if(user.isEmpty()){
@@ -146,7 +144,6 @@ public class UserService {
         if(user.isEmpty()){
             throw new Exception("User not found");
         }
-
         userRepository.delete(user.get());
     }
 }
