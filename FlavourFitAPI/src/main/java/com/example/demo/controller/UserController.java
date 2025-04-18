@@ -6,12 +6,12 @@ import com.example.demo.model.User;
 import com.example.demo.repository.UserRepository;
 import com.example.demo.service.UserService;
 import com.example.demo.utils.Enumerators;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.awt.geom.GeneralPath;
-import java.util.Date;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -27,24 +27,24 @@ public class UserController {
     }
 
     // Read All Users
-    @GetMapping ()
+    @GetMapping()
+    @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> getUsers() {
         try {
             return ResponseEntity.ok(userService.GetAllUsers());
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             String errorMessage = "Internal Server Error";
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e);
         }
     }
 
     // Read User By Id
-    @GetMapping ("/{id}")
+    @GetMapping("/{id}")
+    @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> getUserById(@PathVariable int id) {
         try {
             return ResponseEntity.ok(userService.GetUserById(id));
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             //return (List<User>) ResponseEntity.notFound().build();
             String errorMessage = "User not found";
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e);
@@ -52,11 +52,12 @@ public class UserController {
     }
 
     // Create a User
-    @PostMapping ()
+    @PostMapping()
+    @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> CreateUser(@RequestBody User user) throws Exception {
 
-        Enumerators.UserError result = userService.SaveUser(user);
-        switch(result){
+        Enumerators.UserError result = userService.AddUser(user);
+        switch (result) {
             case MISSING_PASSWORD -> {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorMessage("Password is needed"));
             }
@@ -79,21 +80,16 @@ public class UserController {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorMessage("Generic error"));
             }
         }
-
-
     }
 
-    // Update a user
-    @PutMapping ("/{id}")
+    // Complete Update of a user
+    @PutMapping("/{id}")
+    @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> UpdateUser(@RequestBody User user, @PathVariable int id) throws Exception {
-        Optional<User> exist = userService.GetUserById(id);
-        if(exist.isEmpty()){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{\"error\": \"User not found\"}");
-        }
-        user.set_id(id); // lo metto così uno nel body può anche non passarlo
 
-        Enumerators.UserError result = userService.SaveUser(user);
-        switch(result){
+        user.set_id(id);
+        Enumerators.UserError result = userService.UpdateUser(user);
+        switch (result) {
             case MISSING_PASSWORD -> {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorMessage("Password is needed"));
             }
@@ -109,6 +105,9 @@ public class UserController {
             case DUPLICATE_USERNAME -> {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorMessage("Username is already in use"));
             }
+            case USER_NOT_FOUND -> {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorMessage("User not found"));
+            }
             case NO_ERROR -> {
                 return ResponseEntity.status(HttpStatus.OK).body(new GenericOkMessage("User successfully updated"));
             }
@@ -118,9 +117,45 @@ public class UserController {
         }
     }
 
+    @PatchMapping ("/{id}")
+    @SecurityRequirement(name = "bearerAuth")
+    public ResponseEntity<?> UpdateUser(@RequestBody Map<String, Object> params, @PathVariable int id) throws Exception {
+
+        try {
+            Enumerators.UserError result = userService.UpdateUser(id, params);
+            switch (result) {
+                case DUPLICATE_EMAIL -> {
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorMessage("Email is already in use"));
+                }
+                case DUPLICATE_USERNAME -> {
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorMessage("Username is already in use"));
+                }
+                case NO_ERROR -> {
+                    return ResponseEntity.status(HttpStatus.OK).body(new GenericOkMessage("User successfully updated"));
+                }
+                default -> {
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorMessage("Generic error"));
+                }
+            }
+        }
+        catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorMessage(e.getMessage()));
+        }
+        catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorMessage("Internal Server Error"));
+        }
+    }
+
     // Delete a user
-    @DeleteMapping ("/{username}")
-    public void DeleteUser(@PathVariable int username) throws Exception {
-        return;
+    @DeleteMapping ("/{id}")
+    @SecurityRequirement(name = "bearerAuth")
+    public ResponseEntity<?> DeleteUser(@PathVariable int id) throws Exception {
+        try{
+            userService.DeleteUser(id);
+            return ResponseEntity.ok(new GenericOkMessage("User successfully deleted"));
+        }
+        catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorMessage(e.getMessage()));
+        }
     }
 }

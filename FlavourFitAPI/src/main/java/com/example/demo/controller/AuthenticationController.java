@@ -40,7 +40,9 @@ public class AuthenticationController {
 
             // if i'm here i have username and password correct
             String token = jwtUtil.generateToken(userValue);
+            // return userId and Token
             AuthResponse response = new AuthResponse();
+            response.setUserId(user.get().get_id());
             response.setToken(token);
             return ResponseEntity.status(HttpStatus.OK).body(response);
         } catch (Exception e) {
