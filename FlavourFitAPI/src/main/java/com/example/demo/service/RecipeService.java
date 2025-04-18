@@ -1,7 +1,9 @@
 package com.example.demo.service;
 
 import com.example.demo.model.ErrorMessage;
+import com.example.demo.model.Recipe;
 import com.example.demo.model.User;
+import com.example.demo.repository.RecipeRepository;
 import com.example.demo.repository.UserRepository;
 import com.example.demo.utils.Enumerators;
 import org.springframework.http.HttpStatus;
@@ -9,7 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
-
+@Service
 public class RecipeService {
 
     
