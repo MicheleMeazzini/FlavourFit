@@ -2,6 +2,7 @@ package com.example.demo.controller;
 
 import com.example.demo.model.Recipe;
 import com.example.demo.service.RecipeService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,6 +19,7 @@ public class RecipeController {
 
      // Read All Recipes
      @GetMapping("/all")
+     @SecurityRequirement(name = "bearerAuth")
      public ResponseEntity<?> getRecipe() {
          try {
              return ResponseEntity.ok(recipeService.getAllRecipes());
@@ -29,6 +31,7 @@ public class RecipeController {
 
     // Read Recipe By Id
     @GetMapping("/id/{id}")
+    @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> getRecipeById(@PathVariable int id) {
         try {
             return ResponseEntity.ok(recipeService.getRecipeById(id));
@@ -40,6 +43,7 @@ public class RecipeController {
 
     // Create a Recipe
     @PostMapping
+    @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> createRecipe(@RequestBody Recipe recipe) {
         try {
             recipeService.createRecipe(recipe);
@@ -52,6 +56,7 @@ public class RecipeController {
     
     // Delete a Recipe
     @DeleteMapping("/id/{id}")
+    @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> deleteRecipe(@PathVariable int id) {
         try {
             recipeService.deleteRecipe(id);
