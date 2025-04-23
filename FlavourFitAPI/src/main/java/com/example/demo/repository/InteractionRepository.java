@@ -9,9 +9,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.List;
 
-// Specificare modello e di che tipo è l'ID
 @Repository
-public interface InteractionRepository extends MongoRepository<Interaction, Integer> {
+public interface InteractionRepository extends MongoRepository<Interaction, String> {
 
     List<Interaction> getInteractionByAuthor(String author);
 }

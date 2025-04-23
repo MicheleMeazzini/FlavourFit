@@ -1,127 +1,48 @@
 package com.example.demo.controller;
 
-import com.example.demo.model.ErrorMessage;
-import com.example.demo.model.GenericOkMessage;
 import com.example.demo.model.Interaction;
-import com.example.demo.model.User;
 import com.example.demo.service.InteractionService;
-import com.example.demo.utils.Enumerators;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
-@RequestMapping("api/v1/interaction")
+@RequestMapping("/interactions")
 public class InteractionController {
 
-    private final InteractionService interactionService;
+    @Autowired
+    private InteractionService service;
 
-    public InteractionController(InteractionService interactionService) {
-        this.interactionService = interactionService;
+    @GetMapping
+    @SecurityRequirement(name = "bearerAuth")
+    public List<Interaction> getAllInteractions() {
+        return service.getAllInteractions();
     }
 
-    // Read All Interactions
-    @GetMapping("/all")
+    @GetMapping("/{id}")
     @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<?> getInteractions() {
-        try {
-            return ResponseEntity.ok(interactionService.getAllInteractions());
-        } catch (Exception e) {
-            String errorMessage = "Internal Server Error";
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorMessage);
-        }
+    public Optional<Interaction> getInteractionById(@PathVariable String id) {
+        return service.getInteractionById(id);
     }
 
-    // Read Interaction By Id
-    @GetMapping("/id/{id}")
+    @PostMapping
     @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<?> getInteractionById(@PathVariable int id) {
-        try {
-            return ResponseEntity.ok(interactionService.getInteractionById(id));
-        } catch (Exception e) {
-            String errorMessage = "Interaction not found";
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorMessage);
-        }
+    public Interaction createInteraction(@RequestBody Interaction interaction) {
+        return service.createInteraction(interaction);
     }
 
-    // Read Interaction By author name
-    @GetMapping("/author/{author}")
+    @PutMapping("/{id}")
     @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<?> getInteractionByAuthor(@PathVariable String author) {
-        try {
-            return ResponseEntity.ok(interactionService.getInteractionByAuthor(author));
-        } catch (Exception e) {
-            String errorMessage = "Interaction not found";
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorMessage);
-        }
+    public Interaction updateInteraction(@PathVariable String id, @RequestBody Interaction interaction) {
+        return service.updateInteraction(id, interaction);
     }
 
-    // Create an Interaction
-    @PostMapping ()
+    @DeleteMapping("/{id}")
     @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<?> CreateInteraction(@RequestBody Interaction interaction) throws Exception {
-
-        //NO_ERROR, MISSING_REVIEW, MISSING_RATING, MISSING_AUTHOR, MISSING_USER_ID, MISSING_RECIPE_ID, INVALID_RATING, RECIPE_NOT_FOUND, USER_NOT_FOUND, GENERIC_ERROR
-
-        Enumerators.InteractionError result = interactionService.SaveInteraction(interaction);
-        switch(result){
-            case MISSING_REVIEW -> {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorMessage("Review is needed"));
-            }
-            case MISSING_RATING -> {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorMessage("Rating is needed"));
-            }
-            case MISSING_AUTHOR -> {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorMessage("Author is needed"));
-            }
-            case MISSING_USER_ID -> {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorMessage("User id is needed"));
-            }
-            case MISSING_RECIPE_ID -> {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorMessage("Recipe id is needed"));
-            }
-            case RECIPE_NOT_FOUND -> {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorMessage("Recipe not found"));
-            }
-            case USER_NOT_FOUND -> {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorMessage("User not found"));
-            }
-            case NO_ERROR -> {
-                return ResponseEntity.status(HttpStatus.OK).body(new GenericOkMessage("Interaction successfully created"));
-            }
-            default -> {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorMessage("Generic error"));
-            }
-        }
-    }
-
-    // Update an Interaction
-    @PutMapping("/id/{id}")
-    @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<?> updateInteraction(@PathVariable int id, @RequestBody Interaction interaction) {
-        try {
-            interactionService.updateInteraction(id, interaction);
-            return ResponseEntity.ok().build();
-        } catch (Exception e) {
-            String errorMessage = "Failed to update interaction";
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorMessage);
-        }
-    }
-
-    // Delete an Interaction
-    @DeleteMapping("/id/{id}")
-    @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<?> deleteInteraction(@PathVariable int id) {
-        try {
-            interactionService.deleteInteraction(id);
-            return ResponseEntity.ok().build();
-        } catch (Exception e) {
-            String errorMessage = "Failed to delete interaction";
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorMessage);
-        }
+    public void deleteInteraction(@PathVariable String id) {
+        service.deleteInteraction(id);
     }
 }

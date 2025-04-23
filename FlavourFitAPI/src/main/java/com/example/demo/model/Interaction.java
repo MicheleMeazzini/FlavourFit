@@ -11,7 +11,7 @@ import java.util.Date;
 public class Interaction {
 
     @Id
-    private int _id;
+    private String _id;
     private String review;
     private int rating;
     private int user_id;

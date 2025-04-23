@@ -24,7 +24,7 @@ public class UserService {
         //return new ArrayList<User>();
     }
 
-    public Optional<User> GetUserById(int id) throws Exception {
+    public Optional<User> GetUserById(String id) throws Exception {
          return userRepository.findById(id);
     }
 
@@ -82,7 +82,7 @@ public class UserService {
         }
     }
 
-    public Enumerators.UserError UpdateUser(int id, Map<String, Object> params) throws Exception {
+    public Enumerators.UserError UpdateUser(String id, Map<String, Object> params) throws Exception {
         Optional<User> user = this.GetUserById(id);
         if(user.isEmpty()){
             return Enumerators.UserError.USER_NOT_FOUND;
@@ -139,7 +139,7 @@ public class UserService {
     }
 
     // Delete function
-    public void DeleteUser(int id) throws Exception {
+    public void DeleteUser(String id) throws Exception {
         Optional<User> user = userRepository.findById(id);
         if(user.isEmpty()){
             throw new Exception("User not found");

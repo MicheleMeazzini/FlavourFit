@@ -41,7 +41,7 @@ public class UserController {
     // Read User By Id
     @GetMapping("/{id}")
     @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<?> getUserById(@PathVariable int id) {
+    public ResponseEntity<?> getUserById(@PathVariable String id) {
         try {
             return ResponseEntity.ok(userService.GetUserById(id));
         } catch (Exception e) {
@@ -85,7 +85,7 @@ public class UserController {
     // Complete Update of a user
     @PutMapping("/{id}")
     @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<?> UpdateUser(@RequestBody User user, @PathVariable int id) throws Exception {
+    public ResponseEntity<?> UpdateUser(@RequestBody User user, @PathVariable String id) throws Exception {
 
         user.set_id(id);
         Enumerators.UserError result = userService.UpdateUser(user);
@@ -119,7 +119,7 @@ public class UserController {
 
     @PatchMapping ("/{id}")
     @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<?> UpdateUser(@RequestBody Map<String, Object> params, @PathVariable int id) throws Exception {
+    public ResponseEntity<?> UpdateUser(@RequestBody Map<String, Object> params, @PathVariable String id) throws Exception {
 
         try {
             Enumerators.UserError result = userService.UpdateUser(id, params);
@@ -149,7 +149,7 @@ public class UserController {
     // Delete a user
     @DeleteMapping ("/{id}")
     @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<?> DeleteUser(@PathVariable int id) throws Exception {
+    public ResponseEntity<?> DeleteUser(@PathVariable String id) throws Exception {
         try{
             userService.DeleteUser(id);
             return ResponseEntity.ok(new GenericOkMessage("User successfully deleted"));
