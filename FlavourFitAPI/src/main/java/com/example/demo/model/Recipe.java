@@ -19,7 +19,7 @@ public class Recipe
     private List<Double> nutrition;
     private List<String> steps;
     private String description;
-    private List<Integer> interactions;
+    private List<String> interactions;
 
     public static class Ingredient 
     {

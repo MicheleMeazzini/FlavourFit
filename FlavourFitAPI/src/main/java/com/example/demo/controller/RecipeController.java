@@ -7,6 +7,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Optional;
+
 @RestController
 @RequestMapping("api/v1/recipe")
 public class RecipeController {
@@ -36,6 +38,7 @@ public class RecipeController {
         try {
             return ResponseEntity.ok(recipeService.getRecipeById(id));
         } catch (Exception e) {
+            e.printStackTrace();
             String errorMessage = "Recipe not found";
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorMessage);
         }
