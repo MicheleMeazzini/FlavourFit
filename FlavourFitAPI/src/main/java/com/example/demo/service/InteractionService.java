@@ -30,7 +30,6 @@ public class InteractionService {
         return repository.findById(id).map(interaction -> {
             interaction.setReview(updatedInteraction.getReview());
             interaction.setRating(updatedInteraction.getRating());
-            interaction.setUser_id(updatedInteraction.getUser_id());
             interaction.setDate(updatedInteraction.getDate());
             interaction.setAuthor(updatedInteraction.getAuthor());
             return repository.save(interaction);

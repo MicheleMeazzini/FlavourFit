@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/interactions")
+@RequestMapping("/api/v1/interaction")
 public class InteractionController {
 
     @Autowired

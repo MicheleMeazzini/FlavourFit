@@ -14,7 +14,6 @@ public class Interaction {
     private String _id;
     private String review;
     private int rating;
-    private int user_id;
     private Date date;
     private String author;
 }
