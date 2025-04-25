@@ -29,10 +29,10 @@ public class RecipeController {
          }
      }
 
-    // Read Recipe By Id
+    // Read Recipe By ID
     @GetMapping("/id/{id}")
     @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<?> getRecipeById(@PathVariable int id) {
+    public ResponseEntity<?> getRecipeById(@PathVariable String id) {
         try {
             return ResponseEntity.ok(recipeService.getRecipeById(id));
         } catch (Exception e) {
@@ -50,20 +50,20 @@ public class RecipeController {
             return ResponseEntity.status(HttpStatus.CREATED).build();
         } catch (Exception e) {
             String errorMessage = "Failed to create recipe";
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorMessage);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorMessage);
         }
     }
     
     // Delete a Recipe
     @DeleteMapping("/id/{id}")
     @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<?> deleteRecipe(@PathVariable int id) {
+    public ResponseEntity<?> deleteRecipe(@PathVariable String id) {
         try {
             recipeService.deleteRecipe(id);
             return ResponseEntity.ok().build();
         } catch (Exception e) {
             String errorMessage = "Failed to delete recipe";
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorMessage);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorMessage);
         }
     }
 }

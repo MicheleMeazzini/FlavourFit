@@ -9,7 +9,7 @@ public class Recipe
 {
 
     @Id
-    private Integer _id;
+    private String _id;
 
     private String name;
     private int minutes;

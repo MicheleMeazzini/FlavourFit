@@ -25,7 +25,7 @@ public class RecipeService {
         return recipeRepository.findAll();
     }
 
-    public Optional<Recipe> getRecipeById(int id) throws Exception {
+    public Optional<Recipe> getRecipeById(String id) throws Exception {
         return recipeRepository.findById(id);
     }
 
@@ -33,7 +33,7 @@ public class RecipeService {
         recipeRepository.save(recipe);
     }
 
-    public void deleteRecipe(int id) throws Exception {
+    public void deleteRecipe(String id) throws Exception {
         if (recipeRepository.existsById(id)) {
             recipeRepository.deleteById(id);
         } else {
