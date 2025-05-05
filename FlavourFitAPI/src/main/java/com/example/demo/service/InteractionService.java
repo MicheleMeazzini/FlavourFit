@@ -1,10 +1,12 @@
 package com.example.demo.service;
 
 import com.example.demo.model.Interaction;
+import com.example.demo.model.interactionCrud.CreateInteractionInput;
 import com.example.demo.repository.InteractionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -22,7 +24,16 @@ public class InteractionService {
         return repository.findById(id);
     }
 
-    public Interaction createInteraction(Interaction interaction) {
+    public Interaction createInteraction(CreateInteractionInput createInteractionInput) {
+        Interaction interaction = new Interaction();
+
+        interaction.setReview(createInteractionInput.getReview());
+        interaction.setRating(createInteractionInput.getRating());
+        interaction.setDate(new Date());
+        interaction.setAuthor(createInteractionInput.getAuthor());
+
+        // Logica per mettere l'interaction nell'array in Recipe
+
         return repository.save(interaction);
     }
 

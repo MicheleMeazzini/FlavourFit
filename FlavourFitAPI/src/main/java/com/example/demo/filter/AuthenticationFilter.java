@@ -29,12 +29,21 @@ public class AuthenticationFilter extends OncePerRequestFilter {
                                     FilterChain filterChain) throws ServletException, IOException {
 
         // da togliere la ||
-        if (!request.getRequestURI().startsWith("/api")) {
+        if (!request.getRequestURI().startsWith("/api") || request.getRequestURI().startsWith("/api")) {
             filterChain.doFilter(request, response);
             return;
         }
 
         String header = request.getHeader("Authorization");
+
+        // TEST
+        /*
+        if (header.equals("token")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+        */
+
         if (header != null && header.startsWith("Bearer ")) {
             String token = header.substring(7);
 
