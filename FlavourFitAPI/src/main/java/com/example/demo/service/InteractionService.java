@@ -3,6 +3,7 @@ package com.example.demo.service;
 import com.example.demo.model.Interaction;
 import com.example.demo.model.interactionCrud.CreateInteractionInput;
 import com.example.demo.repository.InteractionRepository;
+import com.example.demo.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -13,15 +14,20 @@ import java.util.Optional;
 @Service
 public class InteractionService {
 
-    @Autowired
-    private InteractionRepository repository;
+    private final InteractionRepository interactionRepository;
+    private final RecipeService recipeService;
+
+    public InteractionService(InteractionRepository interactionRepository, RecipeService recipeService) {
+        this.interactionRepository = interactionRepository;
+        this.recipeService = recipeService;
+    }
 
     public List<Interaction> getAllInteractions() {
-        return repository.findAll();
+        return interactionRepository.findAll();
     }
 
     public Optional<Interaction> getInteractionById(String id) {
-        return repository.findById(id);
+        return interactionRepository.findById(id);
     }
 
     public Interaction createInteraction(CreateInteractionInput createInteractionInput) {
@@ -32,22 +38,24 @@ public class InteractionService {
         interaction.setDate(new Date());
         interaction.setAuthor(createInteractionInput.getAuthor());
 
-        // Logica per mettere l'interaction nell'array in Recipe
+        Interaction savedInteraction = interactionRepository.save(interaction);
 
-        return repository.save(interaction);
+        recipeService.addInteractionToRecipe(createInteractionInput.getRecipe_id(), savedInteraction.get_id());
+
+        return savedInteraction;
     }
 
     public Interaction updateInteraction(String id, Interaction updatedInteraction) {
-        return repository.findById(id).map(interaction -> {
+        return interactionRepository.findById(id).map(interaction -> {
             interaction.setReview(updatedInteraction.getReview());
             interaction.setRating(updatedInteraction.getRating());
             interaction.setDate(updatedInteraction.getDate());
             interaction.setAuthor(updatedInteraction.getAuthor());
-            return repository.save(interaction);
+            return interactionRepository.save(interaction);
         }).orElse(null);
     }
 
     public void deleteInteraction(String id) {
-        repository.deleteById(id);
+        interactionRepository.deleteById(id);
     }
 }

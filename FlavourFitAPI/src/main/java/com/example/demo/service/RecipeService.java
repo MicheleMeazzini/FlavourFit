@@ -117,4 +117,16 @@ public class RecipeService {
             return Enumerators.RecipeError.GENERIC_ERROR;
         }
     }
+
+    public void addInteractionToRecipe(String recipeId, String interactionId) {
+        recipeRepository.findById(recipeId).ifPresent(recipe -> {
+            List<String> interactions = recipe.getInteractions();
+            if (interactions == null) {
+                interactions = new ArrayList<>();
+            }
+            interactions.add(interactionId);
+            recipe.setInteractions(interactions);
+            recipeRepository.save(recipe);
+        });
+    }
 }
