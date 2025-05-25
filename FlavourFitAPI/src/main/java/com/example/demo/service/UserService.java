@@ -32,7 +32,6 @@ public class UserService {
         return userRepository.findByUsername(username);
     }
 
-
     // Create & Update Function
     public Enumerators.UserError AddUser(User user) throws Exception {
         if(user.getUsername() == null || user.getUsername().isEmpty())
