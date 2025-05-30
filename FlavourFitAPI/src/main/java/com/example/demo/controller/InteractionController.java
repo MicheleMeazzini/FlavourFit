@@ -1,6 +1,6 @@
 package com.example.demo.controller;
 
-import com.example.demo.model.Interaction;
+import com.example.demo.model.document.Interaction;
 import com.example.demo.model.interactionCrud.CreateInteractionInput;
 import com.example.demo.service.InteractionService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;

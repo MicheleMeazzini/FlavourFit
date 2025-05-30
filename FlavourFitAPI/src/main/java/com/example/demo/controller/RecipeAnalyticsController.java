@@ -2,7 +2,7 @@ package com.example.demo.controller;
 
 
 import com.example.demo.model.ErrorMessage;
-import com.example.demo.repository.RecipeRepository;
+import com.example.demo.repository.document.RecipeRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

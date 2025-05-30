@@ -1,6 +1,6 @@
 package com.example.demo.utils;
 
-import com.example.demo.model.User;
+import com.example.demo.model.document.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;

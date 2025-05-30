@@ -1,10 +1,8 @@
 package com.example.demo.service;
 
-import com.example.demo.model.User;
-import com.example.demo.repository.UserRepository;
+import com.example.demo.model.document.User;
+import com.example.demo.repository.document.UserRepository;
 import com.example.demo.utils.Enumerators;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.*;

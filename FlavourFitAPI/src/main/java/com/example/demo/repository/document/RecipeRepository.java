@@ -1,6 +1,6 @@
-package com.example.demo.repository;
+package com.example.demo.repository.document;
 
-import com.example.demo.model.Recipe;
+import com.example.demo.model.document.Recipe;
 import com.example.demo.model.aggregations.*;
 import org.springframework.data.mongodb.repository.Aggregation;
 import org.springframework.data.mongodb.repository.MongoRepository;

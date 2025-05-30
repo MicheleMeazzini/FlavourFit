@@ -1,15 +1,12 @@
-package com.example.demo.repository;
+package com.example.demo.repository.document;
 
-import com.example.demo.model.Interaction;
+import com.example.demo.model.document.Interaction;
 import com.example.demo.model.aggregations.RatingDistribution;
 import com.example.demo.model.aggregations.TopReviewer;
 import com.example.demo.model.aggregations.UserReviewStats;
 import org.springframework.data.mongodb.repository.Aggregation;
 import org.springframework.data.mongodb.repository.MongoRepository;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Repository;
-import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.List;
 

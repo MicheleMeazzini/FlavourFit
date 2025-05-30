@@ -2,7 +2,7 @@ package com.example.demo.controller;
 
 import com.example.demo.model.ErrorMessage;
 import com.example.demo.model.GenericOkMessage;
-import com.example.demo.model.Recipe;
+import com.example.demo.model.document.Recipe;
 import com.example.demo.service.RecipeService;
 import com.example.demo.utils.Enumerators;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -11,7 +11,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("api/v1/recipe")

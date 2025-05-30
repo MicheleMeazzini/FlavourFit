@@ -1,10 +1,8 @@
 package com.example.demo.service;
 
-import com.example.demo.model.Interaction;
+import com.example.demo.model.document.Interaction;
 import com.example.demo.model.interactionCrud.CreateInteractionInput;
-import com.example.demo.repository.InteractionRepository;
-import com.example.demo.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.example.demo.repository.document.InteractionRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;

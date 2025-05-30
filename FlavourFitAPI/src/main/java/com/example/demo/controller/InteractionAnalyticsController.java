@@ -1,7 +1,7 @@
 package com.example.demo.controller;
 
 import com.example.demo.model.ErrorMessage;
-import com.example.demo.repository.InteractionRepository;
+import com.example.demo.repository.document.InteractionRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

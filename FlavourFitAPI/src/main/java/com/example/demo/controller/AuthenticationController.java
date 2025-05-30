@@ -1,6 +1,6 @@
 package com.example.demo.controller;
 
-import com.example.demo.model.User;
+import com.example.demo.model.document.User;
 import com.example.demo.model.authentication.AuthRequest;
 import com.example.demo.model.authentication.AuthResponse;
 import com.example.demo.utils.JwtUtil;

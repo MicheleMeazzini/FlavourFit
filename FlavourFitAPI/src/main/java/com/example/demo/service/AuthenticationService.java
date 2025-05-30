@@ -1,9 +1,7 @@
 package com.example.demo.service;
 
-import com.example.demo.model.User;
-import com.example.demo.repository.UserRepository;
-import org.springframework.context.annotation.Bean;
-import org.springframework.data.mongodb.core.MongoOperations;
+import com.example.demo.model.document.User;
+import com.example.demo.repository.document.UserRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;

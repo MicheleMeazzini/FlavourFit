@@ -2,8 +2,8 @@ package com.example.demo.controller;
 
 import com.example.demo.model.ErrorMessage;
 import com.example.demo.model.GenericOkMessage;
-import com.example.demo.model.User;
-import com.example.demo.repository.UserRepository;
+import com.example.demo.model.document.User;
+import com.example.demo.repository.document.UserRepository;
 import com.example.demo.service.UserService;
 import com.example.demo.utils.Enumerators;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -12,7 +12,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("api/v1/user")
