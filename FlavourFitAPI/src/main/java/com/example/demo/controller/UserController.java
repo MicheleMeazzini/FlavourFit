@@ -53,31 +53,39 @@ public class UserController {
     // Create a User
     @PostMapping()
     @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<?> CreateUser(@RequestBody User user) throws Exception {
-
-        Enumerators.UserError result = userService.AddUser(user);
-        switch (result) {
-            case MISSING_PASSWORD -> {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorMessage("Password is needed"));
+    public ResponseEntity<?> CreateUser(@RequestBody User user) {
+        try {
+            Enumerators.UserError result = userService.AddUser(user);
+            switch (result) {
+                case MISSING_PASSWORD -> {
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorMessage("Password is needed"));
+                }
+                case MISSING_EMAIL -> {
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorMessage("Email is needed"));
+                }
+                case MISSING_USERNAME -> {
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorMessage("Username is needed"));
+                }
+                case DUPLICATE_EMAIL -> {
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorMessage("Email is already in use"));
+                }
+                case DUPLICATE_USERNAME -> {
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorMessage("Username is already in use"));
+                }
+                case NO_ERROR -> {
+                    return ResponseEntity.status(HttpStatus.OK).body(new GenericOkMessage("User successfully created"));
+                }
+                default -> {
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorMessage("Generic error"));
+                }
             }
-            case MISSING_EMAIL -> {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorMessage("Email is needed"));
-            }
-            case MISSING_USERNAME -> {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorMessage("Username is needed"));
-            }
-            case DUPLICATE_EMAIL -> {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorMessage("Email is already in use"));
-            }
-            case DUPLICATE_USERNAME -> {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorMessage("Username is already in use"));
-            }
-            case NO_ERROR -> {
-                return ResponseEntity.status(HttpStatus.OK).body(new GenericOkMessage("User successfully created"));
-            }
-            default -> {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorMessage("Generic error"));
-            }
+        }
+        catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ErrorMessage("Internal server error: " + e.getMessage()));
+        }
+        catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorMessage("Internal Server Error"));
         }
     }
 

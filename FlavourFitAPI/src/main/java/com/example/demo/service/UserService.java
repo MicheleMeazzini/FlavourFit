@@ -1,9 +1,13 @@
 package com.example.demo.service;
 
 import com.example.demo.model.document.User;
+import com.example.demo.model.graph.UserNode;
 import com.example.demo.repository.document.UserRepository;
+import com.example.demo.repository.graph.UserNodeRepository;
 import com.example.demo.utils.Enumerators;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
@@ -11,9 +15,13 @@ import java.util.*;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final UserNodeRepository userNodeRepository;
+    private final MongoTemplate mongoTemplate;
 
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository, UserNodeRepository userNodeRepository, MongoTemplate mongoTemplate) {
         this.userRepository = userRepository;
+        this.userNodeRepository = userNodeRepository;
+        this.mongoTemplate = mongoTemplate;
     }
 
     // Get Functions
@@ -31,6 +39,7 @@ public class UserService {
     }
 
     // Create & Update Function
+    @Transactional
     public Enumerators.UserError AddUser(User user) throws Exception {
         if(user.getUsername() == null || user.getUsername().isEmpty())
             return Enumerators.UserError.MISSING_USERNAME;
@@ -49,14 +58,23 @@ public class UserService {
 
         user.setRegistration_date(new Date());
         try {
-            userRepository.save(user);
+            // MongoDB: save user
+            User savedUser = userRepository.save(user);
+
+            // Neo4j: create node
+            UserNode userNode = new UserNode();
+            userNode.setId(savedUser.get_id());
+            userNode.setName(savedUser.getUsername());
+            userNodeRepository.save(userNode);
+
             return Enumerators.UserError.NO_ERROR;
-        }
-        catch (Exception e) {
-            return Enumerators.UserError.GENERIC_ERROR;
+
+        } catch (Exception e) {
+            throw new RuntimeException("User creation failed, rollback MongoDB", e);
         }
     }
 
+    @Transactional
     public Enumerators.UserError UpdateUser(User user) throws Exception {
         Optional<User> exist = this.GetUserById(user.get_id());
         if(exist.isEmpty()){
@@ -79,6 +97,7 @@ public class UserService {
         }
     }
 
+    @Transactional
     public Enumerators.UserError UpdateUser(String id, Map<String, Object> params) throws Exception {
         Optional<User> user = this.GetUserById(id);
         if(user.isEmpty()){
@@ -136,6 +155,7 @@ public class UserService {
     }
 
     // Delete function
+    @Transactional
     public void DeleteUser(String id) throws Exception {
         Optional<User> user = userRepository.findById(id);
         if(user.isEmpty()){
