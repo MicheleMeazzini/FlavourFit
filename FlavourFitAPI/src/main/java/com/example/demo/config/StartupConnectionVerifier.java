@@ -2,6 +2,7 @@ package com.example.demo.config;
 
 import org.neo4j.driver.Driver;
 import org.neo4j.driver.Session;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
@@ -18,7 +19,7 @@ public class StartupConnectionVerifier {
     }
 
     @EventListener
-    public void verifyConnections() {
+    public void verifyConnections(ApplicationReadyEvent event) {
         // MongoDB check
         try {
             mongoTemplate.getDb().listCollectionNames().first();
