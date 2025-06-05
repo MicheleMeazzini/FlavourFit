@@ -6,7 +6,7 @@ import org.springframework.data.mongodb.core.mapping.Field;
 @Data
 public class UserReviewStats {
     @Field("_id")
-    private String author; // Può essere ObjectId o String, a seconda del campo
-    private Integer totaleReview;
-    private Double mediaValutazioneData;
+    private String author;
+    private Integer reviewCount;
+    private Double avgRatingGiven;
 }

@@ -4,6 +4,7 @@ import com.example.demo.model.ErrorMessage;
 import com.example.demo.model.GenericOkMessage;
 import com.example.demo.model.document.User;
 import com.example.demo.repository.document.UserRepository;
+import com.example.demo.repository.graph.UserNodeRepository;
 import com.example.demo.service.UserService;
 import com.example.demo.utils.Enumerators;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -19,10 +20,12 @@ public class UserController {
 
     private final UserService userService;
     private final UserRepository userRepository;
+    private final UserNodeRepository userNodeRepository;
 
-    public UserController(UserService userService, UserRepository userRepository) {
+    public UserController(UserService userService, UserRepository userRepository, UserNodeRepository userNodeRepository) {
         this.userService = userService;
         this.userRepository = userRepository;
+        this.userNodeRepository = userNodeRepository;
     }
 
     // Read All Users
@@ -163,6 +166,30 @@ public class UserController {
         }
         catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorMessage(e.getMessage()));
+        }
+    }
+
+    // Read All Users GraphDB
+    @GetMapping("/node")
+    @SecurityRequirement(name = "bearerAuth")
+    public ResponseEntity<?> getUsersNodes() {
+        try {
+            return ResponseEntity.ok(userNodeRepository.findAll());
+        } catch (Exception e) {
+            String errorMessage = "Internal Server Error";
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e);
+        }
+    }
+
+    // Read All Users
+    @GetMapping("/node/{id}")
+    @SecurityRequirement(name = "bearerAuth")
+    public ResponseEntity<?> getUsersNodesById(@PathVariable String id) {
+        try {
+            return ResponseEntity.ok(userNodeRepository.findUserNodeById(id));
+        } catch (Exception e) {
+            String errorMessage = "Internal Server Error";
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e);
         }
     }
 }

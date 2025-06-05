@@ -43,7 +43,7 @@ public class InteractionController {
 
     @DeleteMapping("/{id}")
     @SecurityRequirement(name = "bearerAuth")
-    public void deleteInteraction(@PathVariable String id) {
+    public void deleteInteraction(@PathVariable String id) throws Exception {
         service.deleteInteraction(id);
     }
 }

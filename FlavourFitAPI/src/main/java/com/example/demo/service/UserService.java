@@ -1,5 +1,7 @@
 package com.example.demo.service;
 
+import com.example.demo.model.document.Interaction;
+import com.example.demo.model.document.Recipe;
 import com.example.demo.model.document.User;
 import com.example.demo.model.graph.UserNode;
 import com.example.demo.repository.document.InteractionRepository;
@@ -7,7 +9,6 @@ import com.example.demo.repository.document.RecipeRepository;
 import com.example.demo.repository.document.UserRepository;
 import com.example.demo.repository.graph.UserNodeRepository;
 import com.example.demo.utils.Enumerators;
-import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,11 +21,15 @@ public class UserService {
     private final UserNodeRepository userNodeRepository;
     private final RecipeRepository recipeRepository;
     private final InteractionRepository interactionRepository;
+    private final RecipeService recipeService;
+    private final InteractionService interactionService;
 
-    public UserService(UserRepository userRepository, UserNodeRepository userNodeRepository, RecipeRepository recipeRepository, InteractionRepository interactionRepository) {
+    public UserService(UserRepository userRepository, UserNodeRepository userNodeRepository, RecipeRepository recipeRepository, RecipeService recipeService, InteractionService interactionService, InteractionRepository interactionRepository) {
         this.userRepository = userRepository;
         this.userNodeRepository = userNodeRepository;
         this.recipeRepository = recipeRepository;
+        this.recipeService = recipeService;
+        this.interactionService = interactionService;
         this.interactionRepository = interactionRepository;
     }
 
@@ -104,13 +109,14 @@ public class UserService {
         }
     }
 
-    @Transactional
     public Enumerators.UserError UpdateUser(String id, Map<String, Object> params) throws Exception {
         Optional<User> user = this.GetUserById(id);
+        String oldUsername = user.get().getUsername();
         if(user.isEmpty()){
             return Enumerators.UserError.USER_NOT_FOUND;
         }
 
+        User usr = user.get();
         boolean neo4jUpdateNeeded = false;
 
         for (Map.Entry<String, Object> entry : params.entrySet()) {
@@ -123,7 +129,7 @@ public class UserService {
                     if (userRepository.existsByUsername(newUsername)) {
                         return Enumerators.UserError.DUPLICATE_USERNAME;
                     }
-                    user.get().setUsername(newUsername);
+                    usr.setUsername(newUsername);
                     neo4jUpdateNeeded = true;
                     break;
 
@@ -132,20 +138,16 @@ public class UserService {
                     if (userRepository.existsByEmail(newEmail)) {
                         return Enumerators.UserError.DUPLICATE_EMAIL;
                     }
-                    user.get().setEmail(newEmail);
+                    usr.setEmail(newEmail);
                     break;
 
                 case "hashed_password":
-                    user.get().setHashed_password((String) fieldValue);
-                    break;
-
-                case "plain_password":
-                    user.get().setPlain_password((String) fieldValue);
+                    usr.setHashed_password((String) fieldValue);
                     break;
 
                 case "role":
                     if (fieldValue instanceof Number) {
-                        user.get().setRole(((Number) fieldValue).intValue());
+                        usr.setRole(((Number) fieldValue).intValue());
                     }
                     break;
 
@@ -155,12 +157,27 @@ public class UserService {
         }
 
         try {
-            userRepository.save(user.get());
+            userRepository.save(usr);
 
             if(neo4jUpdateNeeded){
+                String newUsername = usr.getUsername();
+
+                List<Recipe> recipes = recipeRepository.getRecipeByAuthor(oldUsername);
+                for (Recipe recipe : recipes) {
+                    recipe.setAuthor(newUsername);
+                    recipeRepository.save(recipe);
+                }
+
+                List<Interaction> interactions = interactionRepository.getInteractionByAuthor(oldUsername);
+                for (Interaction interaction : interactions) {
+                    interaction.setAuthor(newUsername);
+                    interactionRepository.save(interaction);
+                }
+
                 // Update Neo4j node
-                UserNode userNode = userNodeRepository.findById(id).orElseThrow(() -> new Exception("UserNode not found"));
-                userNode.setName(user.get().getUsername());
+                //UserNode userNode = userNodeRepository.findById(id).orElseThrow(() -> new Exception("UserNode not found"));
+                UserNode userNode = userNodeRepository.findUserNodeById(id).orElseThrow(() -> new Exception("UserNode not found"));
+                userNode.setName(usr.getUsername());
                 userNodeRepository.save(userNode);
             }
             return Enumerators.UserError.NO_ERROR;
@@ -181,8 +198,17 @@ public class UserService {
         }
         try {
             User usr = user.get();
-            recipeRepository.deleteByAuthor(usr.getUsername()); // delete all recipes by author
-            interactionRepository.deleteByAuthor(usr.getUsername()); // delete all interactions by author
+            List<Recipe> recipes = recipeRepository.getRecipeByAuthor(usr.getUsername());
+
+            for (Recipe recipe : recipes) {
+                if (recipe.getInteractions() != null) {
+                    for (String interactionId : recipe.getInteractions()) {
+                        interactionService.deleteInteraction(interactionId);
+                    }
+                }
+                recipeService.deleteRecipe(recipe.get_id());
+            }
+
             userRepository.delete(usr); // delete user from MongoDB
             userNodeRepository.deleteUserNodeAndRelationships(id); // delete user node and relationships from Neo4j
         }

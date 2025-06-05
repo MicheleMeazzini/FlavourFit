@@ -4,9 +4,11 @@ import com.example.demo.model.document.Recipe;
 import com.example.demo.model.aggregations.*;
 import org.springframework.data.mongodb.repository.Aggregation;
 import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.data.mongodb.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface RecipeRepository extends MongoRepository<Recipe, String>
@@ -22,6 +24,9 @@ public interface RecipeRepository extends MongoRepository<Recipe, String>
     */
 
     void deleteByAuthor(String author);
+    List<Recipe> getRecipeByAuthor(String author);
+    @Query("{ 'interactions': ObjectId(?0) }")
+    Optional<Recipe> findRecipeByInteractionId(String interactionId);
 
     @Aggregation(pipeline = {
             "{ $sort: { createdAt: -1 } }",

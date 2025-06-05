@@ -16,7 +16,6 @@ public class User {
     private String username;
     private String email;
     private String hashed_password;
-    private String plain_password;
     private Date registration_date;
     private int role;
 

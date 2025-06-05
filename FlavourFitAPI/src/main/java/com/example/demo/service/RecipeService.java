@@ -1,6 +1,8 @@
 package com.example.demo.service;
 
+import com.example.demo.model.document.Interaction;
 import com.example.demo.model.document.Recipe;
+import com.example.demo.repository.document.InteractionRepository;
 import com.example.demo.repository.document.RecipeRepository;
 import com.example.demo.utils.Enumerators;
 import com.mongodb.DuplicateKeyException;
@@ -11,9 +13,11 @@ import java.util.*;
 public class RecipeService {
 
     private final RecipeRepository recipeRepository;
+    private final InteractionRepository interactionRepository;
 
-    public RecipeService(RecipeRepository recipeRepository) {
+    public RecipeService(RecipeRepository recipeRepository, InteractionRepository interactionRepository) {
         this.recipeRepository = recipeRepository;
+        this.interactionRepository = interactionRepository;
     }
 
     public List<Recipe> getAllRecipes() throws Exception {
@@ -30,6 +34,14 @@ public class RecipeService {
 
     public void deleteRecipe(String id) throws Exception {
         if (recipeRepository.existsById(id)) {
+            Recipe recipe = recipeRepository.findById(id).orElseThrow(() -> new Exception("Recipe not found"));
+
+            if (recipe.getInteractions() != null) {
+                for (String interaction : recipe.getInteractions()) {
+                    interactionRepository.deleteById(interaction);
+                }
+            }
+
             recipeRepository.deleteById(id);
         } else {
             throw new Exception("Recipe not found");

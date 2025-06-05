@@ -1,8 +1,10 @@
 package com.example.demo.service;
 
 import com.example.demo.model.document.Interaction;
+import com.example.demo.model.document.Recipe;
 import com.example.demo.model.interactionCrud.CreateInteractionInput;
 import com.example.demo.repository.document.InteractionRepository;
+import com.example.demo.repository.document.RecipeRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -13,10 +15,12 @@ import java.util.Optional;
 public class InteractionService {
 
     private final InteractionRepository interactionRepository;
+    private final RecipeRepository recipeRepository;
     private final RecipeService recipeService;
 
-    public InteractionService(InteractionRepository interactionRepository, RecipeService recipeService) {
+    public InteractionService(InteractionRepository interactionRepository, RecipeRepository recipeRepository, RecipeService recipeService) {
         this.interactionRepository = interactionRepository;
+        this.recipeRepository = recipeRepository;
         this.recipeService = recipeService;
     }
 
@@ -53,7 +57,19 @@ public class InteractionService {
         }).orElse(null);
     }
 
-    public void deleteInteraction(String id) {
+    public void deleteInteraction(String id) throws Exception {
+        Optional<Recipe> recipe = recipeRepository.findRecipeByInteractionId(id);
+
+        if (recipe.isEmpty()) {
+            throw new Exception("Interaction not associated with any recipe");
+        }
+
+        Recipe savedRecipe = recipe.get();
+        savedRecipe.getInteractions().remove(id);
+
+        recipeRepository.save(savedRecipe);
+
         interactionRepository.deleteById(id);
     }
+
 }
