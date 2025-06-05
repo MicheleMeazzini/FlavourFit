@@ -20,6 +20,9 @@ public interface RecipeRepository extends MongoRepository<Recipe, String>
 
     })
     */
+
+    void deleteByAuthor(String author);
+
     @Aggregation(pipeline = {
             "{ $sort: { createdAt: -1 } }",
             "{ $project: { name: 1, interactions: 1 }}",

@@ -13,6 +13,8 @@ import java.util.List;
 @Repository
 public interface InteractionRepository extends MongoRepository<Interaction, String> {
 
+    void deleteByAuthor(String author);
+
     List<Interaction> getInteractionByAuthor(String author);
 
     @Aggregation(pipeline = {

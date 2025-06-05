@@ -2,6 +2,8 @@ package com.example.demo.service;
 
 import com.example.demo.model.document.User;
 import com.example.demo.model.graph.UserNode;
+import com.example.demo.repository.document.InteractionRepository;
+import com.example.demo.repository.document.RecipeRepository;
 import com.example.demo.repository.document.UserRepository;
 import com.example.demo.repository.graph.UserNodeRepository;
 import com.example.demo.utils.Enumerators;
@@ -16,15 +18,17 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final UserNodeRepository userNodeRepository;
-    private final MongoTemplate mongoTemplate;
+    private final RecipeRepository recipeRepository;
+    private final InteractionRepository interactionRepository;
 
-    public UserService(UserRepository userRepository, UserNodeRepository userNodeRepository, MongoTemplate mongoTemplate) {
+    public UserService(UserRepository userRepository, UserNodeRepository userNodeRepository, RecipeRepository recipeRepository, InteractionRepository interactionRepository) {
         this.userRepository = userRepository;
         this.userNodeRepository = userNodeRepository;
-        this.mongoTemplate = mongoTemplate;
+        this.recipeRepository = recipeRepository;
+        this.interactionRepository = interactionRepository;
     }
 
-    // Get Functions
+    // <editor-fold desc="Get User Operations">
     public List<User> GetAllUsers() throws Exception {
         return userRepository.findAll();
         //return new ArrayList<User>();
@@ -37,8 +41,9 @@ public class UserService {
     public Optional<User> GetUserByUsername(String username) throws Exception {
         return userRepository.findByUsername(username);
     }
+    // </editor-fold>
 
-    // Create & Update Function
+    // <editor-fold desc="Create User Operations">
     @Transactional
     public Enumerators.UserError AddUser(User user) throws Exception {
         if(user.getUsername() == null || user.getUsername().isEmpty())
@@ -73,7 +78,9 @@ public class UserService {
             throw new RuntimeException("User creation failed, rollback MongoDB", e);
         }
     }
+    // </editor-fold>
 
+    // <editor-fold desc="Update User Operations">
     @Transactional
     public Enumerators.UserError UpdateUser(User user) throws Exception {
         Optional<User> exist = this.GetUserById(user.get_id());
@@ -104,6 +111,8 @@ public class UserService {
             return Enumerators.UserError.USER_NOT_FOUND;
         }
 
+        boolean neo4jUpdateNeeded = false;
+
         for (Map.Entry<String, Object> entry : params.entrySet()) {
             String fieldName = entry.getKey();
             Object fieldValue = entry.getValue();
@@ -115,6 +124,7 @@ public class UserService {
                         return Enumerators.UserError.DUPLICATE_USERNAME;
                     }
                     user.get().setUsername(newUsername);
+                    neo4jUpdateNeeded = true;
                     break;
 
                 case "email":
@@ -140,27 +150,45 @@ public class UserService {
                     break;
 
                 default:
-                    throw new IllegalArgumentException("Campo non aggiornabile: " + fieldName);
+                    throw new IllegalArgumentException("Not Updatable field: " + fieldName);
             }
         }
 
         try {
             userRepository.save(user.get());
+
+            if(neo4jUpdateNeeded){
+                // Update Neo4j node
+                UserNode userNode = userNodeRepository.findById(id).orElseThrow(() -> new Exception("UserNode not found"));
+                userNode.setName(user.get().getUsername());
+                userNodeRepository.save(userNode);
+            }
             return Enumerators.UserError.NO_ERROR;
         }
         catch (Exception e) {
-            System.out.println("Errore durante il salvataggio: " + e.getMessage());
-            return Enumerators.UserError.GENERIC_ERROR;
+            throw new RuntimeException("Update failed: rollback Mongo", e);
         }
     }
 
-    // Delete function
+    // </editor-fold>
+
+    // <editor-fold desc="Delete User Operations">
     @Transactional
     public void DeleteUser(String id) throws Exception {
         Optional<User> user = userRepository.findById(id);
         if(user.isEmpty()){
             throw new Exception("User not found");
         }
-        userRepository.delete(user.get());
+        try {
+            User usr = user.get();
+            recipeRepository.deleteByAuthor(usr.getUsername()); // delete all recipes by author
+            interactionRepository.deleteByAuthor(usr.getUsername()); // delete all interactions by author
+            userRepository.delete(usr); // delete user from MongoDB
+            userNodeRepository.deleteUserNodeAndRelationships(id); // delete user node and relationships from Neo4j
+        }
+        catch (Exception e) {
+            throw new RuntimeException("Delete failed: rollback Mongo", e);
+        }
     }
+    // </editor-fold>
 }

@@ -3,6 +3,8 @@ package com.example.demo.model.document;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
+
 import java.util.List;
 
 @Data
@@ -22,6 +24,9 @@ public class Recipe
     private List<String> steps;
     private String description;
     private List<String> interactions;
+    private String author_id;
+    @Field("author_name")
+    private String author;
 
     @Data
     public static class Ingredient
