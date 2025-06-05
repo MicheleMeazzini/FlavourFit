@@ -24,9 +24,4 @@ public class MongoConfig {
         return converter;
     }
 
-    // Transaction to manage MongoDB transactions
-    @Bean
-    public MongoTransactionManager transactionManager(MongoDatabaseFactory dbFactory) {
-        return new MongoTransactionManager(dbFactory);
-    }
 }
