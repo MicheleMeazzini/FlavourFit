@@ -1,5 +1,7 @@
 package com.example.demo.filter;
 
+import com.example.demo.model.document.User;
+import com.example.demo.repository.document.UserRepository;
 import com.example.demo.utils.JwtUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -18,10 +20,14 @@ import java.util.ArrayList;
 
 public class AuthenticationFilter extends OncePerRequestFilter {
     private final JwtUtil jwtUtil;
+    private final UserRepository userRepository;
 
-    public AuthenticationFilter(JwtUtil jwtUtil) {
+
+    public AuthenticationFilter(JwtUtil jwtUtil, UserRepository userRepository) {
         this.jwtUtil = jwtUtil;
+        this.userRepository = userRepository;
     }
+
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
@@ -29,7 +35,7 @@ public class AuthenticationFilter extends OncePerRequestFilter {
                                     FilterChain filterChain) throws ServletException, IOException {
 
         // da togliere la ||
-        if (!request.getRequestURI().startsWith("/api") || request.getRequestURI().startsWith("/api")) {
+        if (!request.getRequestURI().startsWith("/api")) {
             filterChain.doFilter(request, response);
             return;
         }
@@ -46,6 +52,17 @@ public class AuthenticationFilter extends OncePerRequestFilter {
 
         if (header != null && header.startsWith("Bearer ")) {
             String token = header.substring(7);
+
+            String username = jwtUtil.extractUsername(token);
+
+
+            User user = userRepository.findByUsername(username).orElse(null);
+            Integer role = (user != null) ? user.getRole() : null;
+
+            request.setAttribute("requestRole",role);
+            request.setAttribute("requesterUsername", username);
+            request.setAttribute("requesterId", user.get_id());
+
 
             try {
                 if (jwtUtil.isTokenExpired(token)) {

@@ -27,8 +27,7 @@ public class JwtUtil {
     }
 
     // Estrai il nome utente dal token JWT
-    public String extractUsername(String token) {
-        return getClaimsFromToken(token).getSubject();
+    public String extractUsername(String token) { return getClaimsFromToken(token).getSubject();
     }
 
     // Controlla se il token è scaduto

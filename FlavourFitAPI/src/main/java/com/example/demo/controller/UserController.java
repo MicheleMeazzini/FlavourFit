@@ -6,8 +6,10 @@ import com.example.demo.model.document.User;
 import com.example.demo.repository.document.UserRepository;
 import com.example.demo.repository.graph.UserNodeRepository;
 import com.example.demo.service.UserService;
+import com.example.demo.utils.AuthorizationUtil;
 import com.example.demo.utils.Enumerators;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -21,12 +23,23 @@ public class UserController {
     private final UserService userService;
     private final UserRepository userRepository;
     private final UserNodeRepository userNodeRepository;
+    private final AuthorizationUtil authorizationUtil;
 
-    public UserController(UserService userService, UserRepository userRepository, UserNodeRepository userNodeRepository) {
+    public UserController(UserService userService, UserRepository userRepository, UserNodeRepository userNodeRepository, AuthorizationUtil authorizationUtil) {
         this.userService = userService;
         this.userRepository = userRepository;
         this.userNodeRepository = userNodeRepository;
+        this.authorizationUtil = authorizationUtil;
     }
+
+
+   /* @GetMapping("/check-role")
+    public ResponseEntity<String> checkRole(HttpServletRequest request) {
+        Integer role = (Integer) request.getAttribute("userRole");
+        boolean isAdmin = role != null && role == 1;
+
+        return ResponseEntity.ok(isAdmin ? "Sei un admin" : "Utente normale");
+    }*/
 
     // Read All Users
     @GetMapping()
@@ -159,8 +172,13 @@ public class UserController {
     // Delete a user
     @DeleteMapping ("/{id}")
     @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<?> DeleteUser(@PathVariable String id) throws Exception {
+    public ResponseEntity<?> deleteUser(@PathVariable String id, HttpServletRequest request) throws Exception{
         try{
+
+            boolean authorized = authorizationUtil.verifyOwnershipOrAdmin(request, id);
+            if(!authorized)
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorMessage("No access to delete user"));
+
             userService.DeleteUser(id);
             return ResponseEntity.ok(new GenericOkMessage("User successfully deleted"));
         }

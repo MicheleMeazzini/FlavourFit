@@ -4,22 +4,27 @@ import com.example.demo.model.ErrorMessage;
 import com.example.demo.model.GenericOkMessage;
 import com.example.demo.model.document.Recipe;
 import com.example.demo.service.RecipeService;
+import com.example.demo.utils.AuthorizationUtil;
 import com.example.demo.utils.Enumerators;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("api/v1/recipe")
 public class RecipeController {
 
     private final RecipeService recipeService;
+    private final AuthorizationUtil authorizationUtil;
 
-    public RecipeController(RecipeService recipeService) {
+    public RecipeController(RecipeService recipeService, AuthorizationUtil authorizationUtil) {
         this.recipeService = recipeService;
+        this.authorizationUtil = authorizationUtil;
     }
 
      // Read All Recipes
@@ -61,17 +66,31 @@ public class RecipeController {
     }
     
     // Delete a Recipe
-    @DeleteMapping("/id/{id}")
+    @DeleteMapping("/{id}")
     @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<?> deleteRecipe(@PathVariable String id) {
-        try {
+    public ResponseEntity<?> deleteRecipe(@PathVariable String id, HttpServletRequest request) throws Exception {
+        Optional<Recipe> recipeOpt = recipeService.getRecipeById(id);
+
+        if (recipeOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new ErrorMessage("Recipe not found"));
+        }
+
+        Recipe recipe = recipeOpt.get();
+
+        try
+        {
+            boolean authorized = authorizationUtil.verifyOwnershipOrAdmin(request, recipe.getAuthor_id());
+            if(!authorized)
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorMessage("No access to delete user"));
             recipeService.deleteRecipe(id);
-            return ResponseEntity.ok().build();
+            return ResponseEntity.ok(new GenericOkMessage("Recipe successfully deleted"));
         } catch (Exception e) {
-            String errorMessage = "Failed to delete recipe";
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorMessage);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ErrorMessage(e.getMessage()));
         }
     }
+
 
     @PutMapping("/id/{id}")
     @SecurityRequirement(name = "bearerAuth")

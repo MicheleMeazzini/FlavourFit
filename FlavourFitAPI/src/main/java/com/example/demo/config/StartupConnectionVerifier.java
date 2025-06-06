@@ -31,6 +31,7 @@ public class StartupConnectionVerifier {
         }
 
         // Neo4j check
+
         try (Session session = neo4jDriver.session()) {
             Result result = session.run("MATCH (n:User) RETURN COUNT(n) AS count");
             long count = result.single().get("count").asLong();

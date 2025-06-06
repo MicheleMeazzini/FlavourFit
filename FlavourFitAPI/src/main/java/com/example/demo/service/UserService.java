@@ -49,7 +49,7 @@ public class UserService {
     // </editor-fold>
 
     // <editor-fold desc="Create User Operations">
-    @Transactional
+
     public Enumerators.UserError AddUser(User user) throws Exception {
         if(user.getUsername() == null || user.getUsername().isEmpty())
             return Enumerators.UserError.MISSING_USERNAME;
@@ -86,7 +86,6 @@ public class UserService {
     // </editor-fold>
 
     // <editor-fold desc="Update User Operations">
-    @Transactional
     public Enumerators.UserError UpdateUser(User user) throws Exception {
         Optional<User> exist = this.GetUserById(user.get_id());
         if(exist.isEmpty()){
