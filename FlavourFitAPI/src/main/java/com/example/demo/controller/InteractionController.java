@@ -1,6 +1,7 @@
 package com.example.demo.controller;
 
 import com.example.demo.model.ErrorMessage;
+import com.example.demo.model.GenericOkMessage;
 import com.example.demo.model.document.Interaction;
 import com.example.demo.model.interactionCrud.CreateInteractionInput;
 import com.example.demo.repository.document.UserRepository;
@@ -50,8 +51,24 @@ public class InteractionController {
 
     @PutMapping("/{id}")
     @SecurityRequirement(name = "bearerAuth")
-    public Interaction updateInteraction(@PathVariable String id, @RequestBody Interaction interaction) {
-        return service.updateInteraction(id, interaction);
+    public ResponseEntity<?> updateInteraction(@PathVariable String id, @RequestBody Interaction interaction, HttpServletRequest request) {
+        Optional<Interaction> existing = service.getInteractionById(id);
+        if (existing.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new ErrorMessage("Interaction not found"));
+        }
+
+        String authorUsername = existing.get().getAuthor();
+        String authorId = userRepository.findByUsername(authorUsername)
+                .orElseThrow(() -> new RuntimeException("Author not found")).get_id();
+
+        boolean authorized = authorizationUtil.verifyOwnershipOrAdmin(request, authorId);
+        if (!authorized) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new ErrorMessage("No access to update interaction"));
+        }
+        service.updateInteraction(id, interaction); // la tua logica attuale
+        return ResponseEntity.ok(new GenericOkMessage("Interaction updated"));
     }
 
     @DeleteMapping("/{id}")
