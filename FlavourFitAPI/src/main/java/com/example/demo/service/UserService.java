@@ -288,6 +288,15 @@ public class UserService {
 
         userNodeRepository.unfollowUser(followerId, followeeId);
     }
+
+    public List<UserNode> suggestUsersToFollow(String userId) {
+        return userNodeRepository.suggestUsersToFollow(userId);
+    }
+
+    public List<UserNode> getMostFollowedUsers() {
+        return userNodeRepository.findMostFollowedUsers();
+    }
+
 }
 
 

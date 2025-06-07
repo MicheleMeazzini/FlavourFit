@@ -3,6 +3,7 @@ package com.example.demo.controller;
 import com.example.demo.model.ErrorMessage;
 import com.example.demo.model.GenericOkMessage;
 import com.example.demo.model.document.User;
+import com.example.demo.model.graph.UserNode;
 import com.example.demo.repository.document.UserRepository;
 import com.example.demo.repository.graph.UserNodeRepository;
 import com.example.demo.service.UserService;
@@ -14,6 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -243,5 +245,17 @@ public class UserController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorMessage("Unfollow failed: " + e.getMessage()));
         }
+    }
+
+    @GetMapping("/{userId}/suggested-follows")
+    @SecurityRequirement(name = "bearerAuth")
+    public List<UserNode> suggestFollows(@PathVariable String userId) {
+        return userService.suggestUsersToFollow(userId);
+    }
+
+    @GetMapping("/most-followed")
+    @SecurityRequirement(name = "bearerAuth")
+    public List<UserNode> getMostFollowedUsers() {
+        return userService.getMostFollowedUsers();
     }
 }

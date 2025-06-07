@@ -3,6 +3,7 @@ package com.example.demo.controller;
 import com.example.demo.model.ErrorMessage;
 import com.example.demo.model.GenericOkMessage;
 import com.example.demo.model.document.Recipe;
+import com.example.demo.model.graph.RecipeNode;
 import com.example.demo.service.RecipeService;
 import com.example.demo.service.UserService;
 import com.example.demo.utils.AuthorizationUtil;
@@ -13,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -175,5 +177,23 @@ public class RecipeController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Failed to unlike recipe: " + e.getMessage());
         }
+    }
+
+    @GetMapping("/created-by/{userId}")
+    @SecurityRequirement(name = "bearerAuth")
+    public List<RecipeNode> getCreatedRecipes(@PathVariable String userId) {
+        return recipeService.getRecipesCreatedByUser(userId);
+    }
+
+    @GetMapping("/liked-by-followed/{userId}")
+    @SecurityRequirement(name = "bearerAuth")
+    public List<RecipeNode> getRecipesLikedByFollowed(@PathVariable String userId) {
+        return recipeService.getRecipesLikedByFollowedUsers(userId);
+    }
+
+    @GetMapping("/popular")
+    @SecurityRequirement(name = "bearerAuth")
+    public List<RecipeNode> getPopularRecipes() {
+        return recipeService.getMostLikedRecipes();
     }
 }

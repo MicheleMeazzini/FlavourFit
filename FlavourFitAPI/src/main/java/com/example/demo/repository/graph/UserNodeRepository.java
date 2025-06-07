@@ -67,5 +67,18 @@ public interface UserNodeRepository extends Neo4jRepository<UserNode, String> {
     """)
     Optional<UserNode> findUserNodeAndRelationshipsById(String id);
 
+    /* typical “on-graph” queries */
+    @Query("""
+           MATCH (me:User {id: $userId})-[:FOLLOWS]->(:User)-[:FOLLOWS]->(suggested:User)
+           WHERE NOT (me)-[:FOLLOWS]->(suggested) AND me <> suggested
+           RETURN DISTINCT suggested
+           """)
+    List<UserNode> suggestUsersToFollow(String userId);
 
+    @Query("""
+            MATCH (u:User)<-[:FOLLOWS]-()
+            RETURN u, COUNT(*) AS followerCount
+            ORDER BY followerCount DESC
+           """)
+    List<UserNode> findMostFollowedUsers();
 }

@@ -160,4 +160,17 @@ public class RecipeService {
 
         return savedRecipe;
     }
+
+    public List<RecipeNode> getRecipesCreatedByUser(String userId) {
+        return recipeNodeRepository.findRecipesCreatedByUser(userId);
+    }
+
+    public List<RecipeNode> getRecipesLikedByFollowedUsers(String userId) {
+        return recipeNodeRepository.findRecipesLikedByFollowedUsers(userId);
+    }
+
+    public List<RecipeNode> getMostLikedRecipes() {
+        return recipeNodeRepository.findMostLikedRecipes();
+    }
+
 }
