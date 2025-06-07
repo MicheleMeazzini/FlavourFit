@@ -3,6 +3,7 @@ package com.example.demo.service;
 import com.example.demo.model.document.Interaction;
 import com.example.demo.model.document.Recipe;
 import com.example.demo.model.document.User;
+import com.example.demo.model.graph.RecipeNode;
 import com.example.demo.model.graph.UserNode;
 import com.example.demo.repository.document.InteractionRepository;
 import com.example.demo.repository.document.RecipeRepository;
@@ -23,14 +24,17 @@ public class UserService {
     private final InteractionRepository interactionRepository;
     private final RecipeService recipeService;
     private final InteractionService interactionService;
+    private final MongoService mongoService;
 
-    public UserService(UserRepository userRepository, UserNodeRepository userNodeRepository, RecipeRepository recipeRepository, RecipeService recipeService, InteractionService interactionService, InteractionRepository interactionRepository) {
+
+    public UserService(UserRepository userRepository, UserNodeRepository userNodeRepository, RecipeRepository recipeRepository, RecipeService recipeService, InteractionService interactionService, InteractionRepository interactionRepository, MongoService mongoService) {
         this.userRepository = userRepository;
         this.userNodeRepository = userNodeRepository;
         this.recipeRepository = recipeRepository;
         this.recipeService = recipeService;
         this.interactionService = interactionService;
         this.interactionRepository = interactionRepository;
+        this.mongoService = mongoService;
     }
 
     // <editor-fold desc="Get User Operations">
@@ -110,11 +114,11 @@ public class UserService {
 
     public Enumerators.UserError UpdateUser(String id, Map<String, Object> params) throws Exception {
         Optional<User> user = this.GetUserById(id);
-        String oldUsername = user.get().getUsername();
+
         if(user.isEmpty()){
             return Enumerators.UserError.USER_NOT_FOUND;
         }
-
+        String oldUsername = user.get().getUsername();
         User usr = user.get();
         boolean neo4jUpdateNeeded = false;
 
@@ -189,31 +193,65 @@ public class UserService {
     // </editor-fold>
 
     // <editor-fold desc="Delete User Operations">
-    @Transactional
-    public void DeleteUser(String id) throws Exception {
-        Optional<User> user = userRepository.findById(id);
-        if(user.isEmpty()){
-            throw new Exception("User not found");
+
+
+    public boolean deleteFromNeo4j(String id) throws Exception {
+        Optional<UserNode> userNode = userNodeRepository.findUserNodeById(id);
+        if(userNode.isEmpty()){
+            return false;
         }
         try {
-            User usr = user.get();
-            List<Recipe> recipes = recipeRepository.getRecipeByAuthor(usr.getUsername());
-
-            for (Recipe recipe : recipes) {
-                if (recipe.getInteractions() != null) {
-                    for (String interactionId : recipe.getInteractions()) {
-                        interactionService.deleteInteraction(interactionId);
-                    }
-                }
-                recipeService.deleteRecipe(recipe.get_id());
-            }
-
-            userRepository.delete(usr); // delete user from MongoDB
-            userNodeRepository.deleteUserNodeAndRelationships(id); // delete user node and relationships from Neo4j
+            userNodeRepository.deleteUserNodeAndRelationships(id);
         }
         catch (Exception e) {
-            throw new RuntimeException("Delete failed: rollback Mongo", e);
+            System.out.println("Error deleting UserNode from Neo4j: " + e.getMessage());
+            return false;
         }
+        return true;
     }
+
+
+    public void DeleteUser(String id) throws Exception {
+
+        Optional<UserNode> userNodeOpt = userNodeRepository.findUserNodeById(id);
+        Optional<UserNode> userNodeOpt2 = userNodeRepository.findUserWithAllRelations(id);
+        if (userNodeOpt.isEmpty()) {
+            throw new Exception("User not found in Neo4j");
+        }
+        UserNode backupNode = userNodeOpt.get();
+        UserNode backupNode2 = userNodeOpt2.get();// serve per rollback
+        List<UserNode> followedUsers = userNodeRepository.findFollowedUsersByUserId(id);
+        List<RecipeNode> likedRecipes = userNodeRepository.findLikedRecipesByUserId(id);
+        List<RecipeNode> createdRecipes = userNodeRepository.findCreatedRecipesByUserId(id);
+
+        boolean deletedFromNeo4j = deleteFromNeo4j(id);
+        if(!deletedFromNeo4j) {
+            throw new Exception("Failed to delete user from Neo4j");
+
+        }
+        try {
+            boolean deletedFromMongo = mongoService.deleteUserFromMongoDb(id);
+            if (!deletedFromMongo) {
+                //c'è da fare rollback su neo4j
+                userNodeRepository.save(backupNode); // rollback in caso di errore
+                throw new Exception("Failed to delete user from MongoDB");
+            }
+        }
+        catch(Exception e)
+        {
+            // rollback in caso di errore
+            userNodeRepository.save(backupNode);
+            throw new Exception("Failed to delete user from MongoDB: " + e.getMessage());
+        }
+
+    }
+
     // </editor-fold>
+
+
+
 }
+
+
+
+

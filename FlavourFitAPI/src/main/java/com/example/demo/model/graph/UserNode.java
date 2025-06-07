@@ -7,7 +7,9 @@ import org.springframework.data.neo4j.core.schema.Node;
 import org.springframework.data.neo4j.core.schema.Property;
 import org.springframework.data.neo4j.core.schema.Relationship;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Data
@@ -19,11 +21,11 @@ public class UserNode {
     private String name;
 
     @Relationship(type = "FOLLOWS", direction = Relationship.Direction.OUTGOING)
-    private Set<UserNode> followedUsers = new HashSet<>();
+    private List<UserNode> followedUsers = new ArrayList<>();
 
     @Relationship(type = "LIKES", direction = Relationship.Direction.OUTGOING)
-    private Set<RecipeNode> likedRecipes = new HashSet<>();
+    private List<RecipeNode> likedRecipes = new ArrayList<>();
 
     @Relationship(type = "CREATED", direction = Relationship.Direction.OUTGOING)
-    private Set<RecipeNode> createdRecipes = new HashSet<>();
+    private List<RecipeNode> createdRecipes = new ArrayList<>();
 }
