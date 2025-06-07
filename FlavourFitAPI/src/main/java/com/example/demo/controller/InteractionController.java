@@ -3,6 +3,7 @@ package com.example.demo.controller;
 import com.example.demo.model.ErrorMessage;
 import com.example.demo.model.document.Interaction;
 import com.example.demo.model.interactionCrud.CreateInteractionInput;
+import com.example.demo.repository.document.UserRepository;
 import com.example.demo.service.InteractionService;
 import com.example.demo.utils.AuthorizationUtil;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -22,9 +23,11 @@ public class InteractionController {
     @Autowired
     private InteractionService service;
     private final AuthorizationUtil authorizationUtil;
+    private final UserRepository userRepository;
 
-    public InteractionController(AuthorizationUtil authorizationUtil) {
+    public InteractionController(AuthorizationUtil authorizationUtil, UserRepository userRepository) {
         this.authorizationUtil = authorizationUtil;
+        this.userRepository = userRepository;
     }
 
     @GetMapping
@@ -60,10 +63,14 @@ public class InteractionController {
                     .body(new ErrorMessage("Recipe not found"));
         }
 
-        //Recipe recipe = recipeOpt.get();
-        boolean authorized = authorizationUtil.verifyOwnershipOrAdmin(request, id);
+        String authorUsername = interaction.get().getAuthor();
+
+        String authorId = userRepository.findByUsername(authorUsername)
+                .orElseThrow(() -> new RuntimeException("User not found")).get_id();
+
+        boolean authorized = authorizationUtil.verifyOwnershipOrAdmin(request, authorId);
         if(!authorized)
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorMessage("No access to delete user"));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorMessage("No access to delete interaction"));
         service.deleteInteraction(id);
         return null;
     }
