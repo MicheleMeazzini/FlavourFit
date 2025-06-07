@@ -31,7 +31,7 @@ public class MongoService {
     }
 
     @Transactional("transactionManager")
-    public boolean deleteUserFromMongoDb(String id) throws Exception {
+    public void deleteUserFromMongoDb(String id) throws Exception {
         Optional<User> userOpt = userRepository.findById(id);
         if (userOpt.isEmpty()) {
             throw new IllegalArgumentException("User not found");
@@ -54,7 +54,25 @@ public class MongoService {
         // Thread.sleep(70000); // oppure:
         if(true) throw new RuntimeException("PORCODIDIO");
         userRepository.deleteById(id);
-        return true;
+
     }
+
+    @Transactional("transactionManager")
+    public void updateUserInMongoDb(User updatedUser, String oldUsername) {
+        userRepository.save(updatedUser);
+
+        List<Recipe> recipes = recipeRepository.getRecipeByAuthor(oldUsername);
+        for (Recipe recipe : recipes) {
+            recipe.setAuthor(updatedUser.getUsername());
+            recipeRepository.save(recipe);
+        }
+
+        List<Interaction> interactions = interactionRepository.getInteractionByAuthor(oldUsername);
+        for (Interaction interaction : interactions) {
+            interaction.setAuthor(updatedUser.getUsername());
+            interactionRepository.save(interaction);
+        }
+    }
+
 }
 

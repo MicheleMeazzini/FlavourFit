@@ -74,7 +74,7 @@ public class UserService {
             return Enumerators.UserError.DUPLICATE_USERNAME;
 
         user.setRegistration_date(new Date());
-        try {
+
             // MongoDB: save user
             User savedUser = userRepository.save(user);
 
@@ -82,13 +82,18 @@ public class UserService {
             UserNode userNode = new UserNode();
             userNode.setId(savedUser.get_id());
             userNode.setName(savedUser.getUsername());
-            userNodeRepository.save(userNode);
+            try {
+                userNodeRepository.save(userNode);
+            }
+            catch (Exception e) {
+                // Rollback MongoDB in caso di errore
+                userRepository.delete(savedUser);
+                throw new RuntimeException("Failed to create user in Neo4j, rollback Mongo " + e.getMessage());
+            }
 
             return Enumerators.UserError.NO_ERROR;
 
-        } catch (Exception e) {
-            throw new RuntimeException("User creation failed, rollback MongoDB", e);
-        }
+
     }
     // </editor-fold>
 
@@ -99,20 +104,32 @@ public class UserService {
             return Enumerators.UserError.USER_NOT_FOUND;
         }
 
+        boolean neo4jUpdateNeeded = !user.getUsername().equals(exist.get().getUsername());
+
         if(!user.getEmail().equals(exist.get().getEmail()) && userRepository.existsByEmail(user.getEmail()))
             return Enumerators.UserError.DUPLICATE_EMAIL;
 
         if(!user.getUsername().equals(exist.get().getUsername()) && userRepository.existsByUsername(user.getUsername()))
             return Enumerators.UserError.DUPLICATE_USERNAME;
 
+        UserNode backupNode = neoj4Service.findUserWithAllRelationships(user.get_id())
+                .orElseThrow(() -> new Exception("User not found in Neo4j"));
+
+        if (neo4jUpdateNeeded) {
+            UserNode newNode = new UserNode();
+            newNode.setId(user.get_id());
+            newNode.setName(user.getUsername());
+            userNodeRepository.save(newNode);
+        }
         try {
-            userRepository.save(user);
-            return Enumerators.UserError.NO_ERROR;
+            mongoService.updateUserInMongoDb(user, exist.get().getUsername());
+        } catch (Exception e) {
+            // Rollback in caso di errore
+            if(neo4jUpdateNeeded)
+                userNodeRepository.save(backupNode);
+            throw new Exception("Failed to update user in MongoDB: " + e.getMessage());
         }
-        catch (Exception e) {
-            System.out.println("Errore durante il salvataggio: " + e.getMessage());
-            return Enumerators.UserError.GENERIC_ERROR;
-        }
+        return Enumerators.UserError.NO_ERROR;
     }
 
     public Enumerators.UserError UpdateUser(String id, Map<String, Object> params) throws Exception {
@@ -162,35 +179,24 @@ public class UserService {
             }
         }
 
+        UserNode backupNode = neoj4Service.findUserWithAllRelationships(id)
+                .orElseThrow(() -> new Exception("User not found in Neo4j"));
+
+        if (neo4jUpdateNeeded) {
+            UserNode newNode = new UserNode();
+            newNode.setId(usr.get_id());
+            newNode.setName(usr.getUsername());
+            userNodeRepository.save(newNode);
+        }
         try {
-            userRepository.save(usr);
-
-            if(neo4jUpdateNeeded){
-                String newUsername = usr.getUsername();
-
-                List<Recipe> recipes = recipeRepository.getRecipeByAuthor(oldUsername);
-                for (Recipe recipe : recipes) {
-                    recipe.setAuthor(newUsername);
-                    recipeRepository.save(recipe);
-                }
-
-                List<Interaction> interactions = interactionRepository.getInteractionByAuthor(oldUsername);
-                for (Interaction interaction : interactions) {
-                    interaction.setAuthor(newUsername);
-                    interactionRepository.save(interaction);
-                }
-
-                // Update Neo4j node
-                //UserNode userNode = userNodeRepository.findById(id).orElseThrow(() -> new Exception("UserNode not found"));
-                UserNode userNode = userNodeRepository.findUserNodeById(id).orElseThrow(() -> new Exception("UserNode not found"));
-                userNode.setName(usr.getUsername());
-                userNodeRepository.save(userNode);
-            }
-            return Enumerators.UserError.NO_ERROR;
+            mongoService.updateUserInMongoDb(usr, oldUsername);
+        } catch (Exception e) {
+            // Rollback in caso di errore
+            if(neo4jUpdateNeeded)
+                userNodeRepository.save(backupNode);
+            throw new Exception("Failed to update user in MongoDB: " + e.getMessage());
         }
-        catch (Exception e) {
-            throw new RuntimeException("Update failed: rollback Mongo", e);
-        }
+        return Enumerators.UserError.NO_ERROR;
     }
 
     // </editor-fold>
@@ -223,12 +229,7 @@ public class UserService {
 
         }
         try {
-            boolean deletedFromMongo = mongoService.deleteUserFromMongoDb(id);
-            if (!deletedFromMongo) {
-                //c'è da fare rollback su neo4j
-                userNodeRepository.save(backupNode); // rollback in caso di errore
-                throw new Exception("Failed to delete user from MongoDB");
-            }
+            mongoService.deleteUserFromMongoDb(id);
         }
         catch(Exception e)
         {
