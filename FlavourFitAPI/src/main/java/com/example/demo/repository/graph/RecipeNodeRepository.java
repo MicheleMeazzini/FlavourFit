@@ -31,7 +31,7 @@ public interface RecipeNodeRepository extends Neo4jRepository<RecipeNode, String
     @Query("""
             MATCH (r:Recipe)<-[:LIKES]-()
             RETURN r,COUNT(*) as A
-            ORDER BY A DESC
+            ORDER BY A DESC LIMIT 50
            """)
     List<RecipeNode> findMostLikedRecipes();
 }

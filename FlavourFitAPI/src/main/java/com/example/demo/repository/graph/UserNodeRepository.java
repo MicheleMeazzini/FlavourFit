@@ -78,7 +78,7 @@ public interface UserNodeRepository extends Neo4jRepository<UserNode, String> {
     @Query("""
             MATCH (u:User)<-[:FOLLOWS]-()
             RETURN u, COUNT(*) AS followerCount
-            ORDER BY followerCount DESC
+            ORDER BY followerCount DESC LIMIT 50
            """)
     List<UserNode> findMostFollowedUsers();
 }
