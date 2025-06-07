@@ -15,6 +15,27 @@ public interface UserNodeRepository extends Neo4jRepository<UserNode, String> {
     @Query("MATCH (u:User {id: $id}) DETACH DELETE u")
     void deleteUserNodeAndRelationships(String id);
 
+    @Query("MATCH (a:User {id: $followerId}), (b:User {id: $followeeId}) " +
+            "MERGE (a)-[:FOLLOWS]->(b)")
+    void addFollowRelationship(String followerId, String followeeId);
+
+    @Query("""
+    MATCH (a:User {id: $followerId})-[r:FOLLOWS]->(b:User {id: $followeeId})
+    DELETE r
+    """)
+    void unfollowUser(String followerId, String followeeId);
+
+    @Query("""
+        MATCH (u:User {id: $userId}), (r:Recipe {id: $recipeId})
+        MERGE (u)-[:LIKES]->(r)
+        """)
+    void likeRecipe(String userId, String recipeId);
+
+    @Query("""
+        MATCH (u:User {id: $userId})-[l:LIKES]->(r:Recipe {id: $recipeId})
+        DELETE l
+        """)
+    void unlikeRecipe(String userId, String recipeId);
 
     @Query("MATCH (u:User {id: $id}) RETURN u")
     Optional<UserNode> findUserNodeById(String id);

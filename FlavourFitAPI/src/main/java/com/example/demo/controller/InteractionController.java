@@ -67,7 +67,7 @@ public class InteractionController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(new ErrorMessage("No access to update interaction"));
         }
-        service.updateInteraction(id, interaction); // la tua logica attuale
+        service.updateInteraction(id, interaction);
         return ResponseEntity.ok(new GenericOkMessage("Interaction updated"));
     }
 

@@ -242,10 +242,52 @@ public class UserService {
 
     // </editor-fold>
 
+    public void likeRecipe(String userId, String recipeId) throws Exception {
+        if (userNodeRepository.findById(userId).isEmpty()) {
+            throw new Exception("UserNode not found");
+        }
+        if (recipeRepository.findById(recipeId).isEmpty()) {
+            throw new Exception("Recipe not found in MongoDB");
+        }
 
 
+        userNodeRepository.likeRecipe(userId, recipeId);
+    }
+
+    public void unlikeRecipe(String userId, String recipeId) throws Exception {
+        if (userNodeRepository.findById(userId).isEmpty()) {
+            throw new Exception("UserNode not found");
+        }
+        if (recipeRepository.findById(recipeId).isEmpty()) {
+            throw new Exception("Recipe not found");
+        }
+
+        userNodeRepository.unlikeRecipe(userId, recipeId);
+    }
+
+
+    @Transactional
+    public void followUser(String followerId, String followeeId) throws Exception {
+        if (userNodeRepository.findById(followerId).isEmpty()) {
+            throw new Exception("Follower node not found");
+        }
+        if (userNodeRepository.findById(followeeId).isEmpty()) {
+            throw new Exception("Followee node not found");
+        }
+
+        userNodeRepository.addFollowRelationship(followerId, followeeId);
+    }
+
+    public void unfollowUser(String followerId, String followeeId) throws Exception {
+        Optional<UserNode> follower = userNodeRepository.findById(followerId);
+        Optional<UserNode> followee = userNodeRepository.findById(followeeId);
+
+        if (follower.isEmpty() || followee.isEmpty()) {
+            throw new Exception("User not found");
+        }
+
+        userNodeRepository.unfollowUser(followerId, followeeId);
+    }
 }
-
-
 
 

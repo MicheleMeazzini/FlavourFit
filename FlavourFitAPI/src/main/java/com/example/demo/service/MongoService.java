@@ -52,7 +52,7 @@ public class MongoService {
 
         // Simula timeout/errore
         // Thread.sleep(70000); // oppure:
-        if(true) throw new RuntimeException("PORCODIDIO");
+        //if(true) throw new RuntimeException("PORCODIDIO");
         userRepository.deleteById(id);
 
     }

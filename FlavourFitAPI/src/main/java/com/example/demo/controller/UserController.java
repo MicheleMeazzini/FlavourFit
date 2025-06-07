@@ -185,11 +185,11 @@ public class UserController {
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> deleteUser(@PathVariable String id, HttpServletRequest request) throws Exception{
         try{
-    /*
+
             boolean authorized = authorizationUtil.verifyOwnershipOrAdmin(request, id);
             if(!authorized)
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorMessage("No access to delete user"));
-*/
+
             userService.DeleteUser(id);
             return ResponseEntity.ok(new GenericOkMessage("User successfully deleted"));
         }
@@ -219,6 +219,29 @@ public class UserController {
         } catch (Exception e) {
             String errorMessage = "Internal Server Error";
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e);
+        }
+    }
+
+    @PostMapping("/{followerId}/follow/{followeeId}")
+    @SecurityRequirement(name = "bearerAuth")
+    public ResponseEntity<?> followUser(@PathVariable String followerId, @PathVariable String followeeId) {
+        try {
+            userService.followUser(followerId, followeeId);
+            return ResponseEntity.ok(new GenericOkMessage("Follow relationship created"));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ErrorMessage("Error creating follow relationship: " + e.getMessage()));
+        }
+    }
+
+    @DeleteMapping("/{followerId}/unfollow/{followeeId}")
+    @SecurityRequirement(name = "bearerAuth")
+    public ResponseEntity<?> unfollowUser(@PathVariable String followerId, @PathVariable String followeeId) {
+        try {
+            userService.unfollowUser(followerId, followeeId);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorMessage("Unfollow failed: " + e.getMessage()));
         }
     }
 }

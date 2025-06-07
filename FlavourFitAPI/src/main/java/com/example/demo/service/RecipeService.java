@@ -2,10 +2,14 @@ package com.example.demo.service;
 
 import com.example.demo.model.document.Interaction;
 import com.example.demo.model.document.Recipe;
+import com.example.demo.model.graph.RecipeNode;
 import com.example.demo.repository.document.InteractionRepository;
 import com.example.demo.repository.document.RecipeRepository;
+import com.example.demo.repository.graph.RecipeNodeRepository;
+import com.example.demo.repository.graph.UserNodeRepository;
 import com.example.demo.utils.Enumerators;
 import com.mongodb.DuplicateKeyException;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -13,11 +17,15 @@ import java.util.*;
 public class RecipeService {
 
     private final RecipeRepository recipeRepository;
+    private final RecipeNodeRepository recipeNodeRepository;
+    private final UserNodeRepository userNodeRepository;
     private final InteractionRepository interactionRepository;
 
-    public RecipeService(RecipeRepository recipeRepository, InteractionRepository interactionRepository) {
+    public RecipeService(RecipeRepository recipeRepository, InteractionRepository interactionRepository, RecipeNodeRepository recipeNodeRepository, UserNodeRepository userNodeRepository) {
         this.recipeRepository = recipeRepository;
+        this.recipeNodeRepository = recipeNodeRepository;
         this.interactionRepository = interactionRepository;
+        this.userNodeRepository = userNodeRepository;
     }
 
     public List<Recipe> getAllRecipes() throws Exception {
@@ -26,10 +34,6 @@ public class RecipeService {
 
     public Optional<Recipe> getRecipeById(String id) throws Exception {
         return recipeRepository.findById(id);
-    }
-
-    public void createRecipe(Recipe recipe) throws Exception {
-        recipeRepository.save(recipe);
     }
 
     public void deleteRecipe(String id) throws Exception {
@@ -135,5 +139,25 @@ public class RecipeService {
             recipe.setInteractions(interactions);
             recipeRepository.save(recipe);
         });
+    }
+
+    @Transactional
+    public Recipe createRecipe(Recipe recipe) throws Exception {
+        Recipe savedRecipe = recipeRepository.save(recipe);
+
+        RecipeNode recipeNode = new RecipeNode();
+        recipeNode.setId(savedRecipe.get_id());
+        recipeNode.setName(savedRecipe.getName());
+        recipeNodeRepository.save(recipeNode);
+
+        String authorUsername = savedRecipe.getAuthor();
+        var userNodeOpt = userNodeRepository.findUserNodeById(authorUsername);
+        if (userNodeOpt.isEmpty()) {
+            throw new Exception("Author UserNode not found in Neo4j");
+        }
+
+        recipeNodeRepository.createCreatedRelationship(authorUsername, savedRecipe.get_id());
+
+        return savedRecipe;
     }
 }

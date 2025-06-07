@@ -4,6 +4,7 @@ import com.example.demo.model.ErrorMessage;
 import com.example.demo.model.GenericOkMessage;
 import com.example.demo.model.document.Recipe;
 import com.example.demo.service.RecipeService;
+import com.example.demo.service.UserService;
 import com.example.demo.utils.AuthorizationUtil;
 import com.example.demo.utils.Enumerators;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -21,10 +22,12 @@ public class RecipeController {
 
     private final RecipeService recipeService;
     private final AuthorizationUtil authorizationUtil;
+    private final UserService userService;
 
-    public RecipeController(RecipeService recipeService, AuthorizationUtil authorizationUtil) {
+    public RecipeController(RecipeService recipeService, AuthorizationUtil authorizationUtil, UserService userService) {
         this.recipeService = recipeService;
         this.authorizationUtil = authorizationUtil;
+        this.userService = userService;
     }
 
      // Read All Recipes
@@ -149,6 +152,28 @@ public class RecipeController {
         }
         catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorMessage(e.getMessage()));
+        }
+    }
+
+    @PutMapping("/{recipeId}/like/{userId}")
+    @SecurityRequirement(name = "bearerAuth")
+    public ResponseEntity<?> likeRecipe(@PathVariable String recipeId, @PathVariable String userId) {
+        try {
+            userService.likeRecipe(userId, recipeId);
+            return ResponseEntity.ok().body("Recipe liked successfully");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Failed to like recipe: " + e.getMessage());
+        }
+    }
+
+    @DeleteMapping("/{recipeId}/like/{userId}")
+    @SecurityRequirement(name = "bearerAuth")
+    public ResponseEntity<?> unlikeRecipe(@PathVariable String recipeId, @PathVariable String userId) {
+        try {
+            userService.unlikeRecipe(userId, recipeId);
+            return ResponseEntity.ok().body("Recipe unliked successfully");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Failed to unlike recipe: " + e.getMessage());
         }
     }
 }
