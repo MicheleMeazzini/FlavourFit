@@ -25,9 +25,11 @@ public class UserService {
     private final RecipeService recipeService;
     private final InteractionService interactionService;
     private final MongoService mongoService;
+    private final Neo4jService neoj4Service;
 
 
-    public UserService(UserRepository userRepository, UserNodeRepository userNodeRepository, RecipeRepository recipeRepository, RecipeService recipeService, InteractionService interactionService, InteractionRepository interactionRepository, MongoService mongoService) {
+    public UserService(UserRepository userRepository, UserNodeRepository userNodeRepository, RecipeRepository recipeRepository, RecipeService recipeService,
+                       InteractionService interactionService, InteractionRepository interactionRepository, MongoService mongoService, Neo4jService neo4jService) {
         this.userRepository = userRepository;
         this.userNodeRepository = userNodeRepository;
         this.recipeRepository = recipeRepository;
@@ -35,6 +37,7 @@ public class UserService {
         this.interactionService = interactionService;
         this.interactionRepository = interactionRepository;
         this.mongoService = mongoService;
+        this.neoj4Service = neo4jService;
     }
 
     // <editor-fold desc="Get User Operations">
@@ -194,7 +197,6 @@ public class UserService {
 
     // <editor-fold desc="Delete User Operations">
 
-
     public boolean deleteFromNeo4j(String id) throws Exception {
         Optional<UserNode> userNode = userNodeRepository.findUserNodeById(id);
         if(userNode.isEmpty()){
@@ -210,19 +212,10 @@ public class UserService {
         return true;
     }
 
-
     public void DeleteUser(String id) throws Exception {
 
-        Optional<UserNode> userNodeOpt = userNodeRepository.findUserNodeById(id);
-        Optional<UserNode> userNodeOpt2 = userNodeRepository.findUserWithAllRelations(id);
-        if (userNodeOpt.isEmpty()) {
-            throw new Exception("User not found in Neo4j");
-        }
-        UserNode backupNode = userNodeOpt.get();
-        UserNode backupNode2 = userNodeOpt2.get();// serve per rollback
-        List<UserNode> followedUsers = userNodeRepository.findFollowedUsersByUserId(id);
-        List<RecipeNode> likedRecipes = userNodeRepository.findLikedRecipesByUserId(id);
-        List<RecipeNode> createdRecipes = userNodeRepository.findCreatedRecipesByUserId(id);
+        UserNode backupNode = neoj4Service.findUserWithAllRelationships(id)
+                .orElseThrow(() -> new Exception("User not found in Neo4j"));
 
         boolean deletedFromNeo4j = deleteFromNeo4j(id);
         if(!deletedFromNeo4j) {

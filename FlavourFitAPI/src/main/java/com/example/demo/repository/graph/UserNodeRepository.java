@@ -44,6 +44,7 @@ public interface UserNodeRepository extends Neo4jRepository<UserNode, String> {
     OPTIONAL MATCH (u)-[:CREATED]->(c:Recipe)
     RETURN u, collect(DISTINCT f) as followedUsers, collect(DISTINCT l) as likedRecipes, collect(DISTINCT c) as createdRecipes
     """)
-    Optional<UserNode> findUserWithAllRelations(String id);
+    Optional<UserNode> findUserNodeAndRelationshipsById(String id);
+
 
 }
