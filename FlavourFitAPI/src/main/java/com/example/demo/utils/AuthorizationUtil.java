@@ -19,7 +19,7 @@ public class AuthorizationUtil {
     }
 
     public boolean verifyOwnershipOrAdmin(HttpServletRequest request, String inputId) {
-        Integer role = (Integer) request.getAttribute("requestRole");
+        Integer role = (Integer) request.getAttribute("userRole");
         String resourceOwnerId = (String) request.getAttribute("requesterId");
 
         return !(role == null || (role == 0 && !resourceOwnerId.equals(inputId)));        }

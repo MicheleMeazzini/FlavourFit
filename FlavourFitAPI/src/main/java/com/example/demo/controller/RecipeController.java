@@ -94,8 +94,19 @@ public class RecipeController {
 
     @PutMapping("/id/{id}")
     @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<?> updateRecipe(@PathVariable String id, @RequestBody Recipe updatedRecipe) {
+    public ResponseEntity<?> updateRecipe(@PathVariable String id, @RequestBody Recipe updatedRecipe,HttpServletRequest request) throws Exception {
+        Optional<Recipe> recipeOpt = recipeService.getRecipeById(id);
+
+        if (recipeOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new ErrorMessage("Recipe not found"));
+        }
+
+        Recipe recipe = recipeOpt.get();
         try {
+            boolean authorized = authorizationUtil.verifyOwnershipOrAdmin(request, recipe.getAuthor_id());
+            if(!authorized)
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorMessage("No access to update recipe"));
             recipeService.updateRecipe(id, updatedRecipe);
             return ResponseEntity.ok().build();
         } catch (Exception e) {
@@ -106,8 +117,20 @@ public class RecipeController {
 
     @PatchMapping(value = "/{id}")
     @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<?> updateRecipe(@RequestBody Map<String, Object> params, @PathVariable String id) throws Exception {
+    public ResponseEntity<?> updateRecipe(@RequestBody Map<String, Object> params, @PathVariable String id,HttpServletRequest request) throws Exception {
+        Optional<Recipe> recipeOpt = recipeService.getRecipeById(id);
+
+        if (recipeOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new ErrorMessage("Recipe not found"));
+        }
+
+        Recipe recipe = recipeOpt.get();
         try {
+            boolean authorized = authorizationUtil.verifyOwnershipOrAdmin(request, recipe.getAuthor_id());
+            if(!authorized)
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorMessage("No access to update recipe"));
+
             Enumerators.RecipeError result = recipeService.updateRecipe(id, params);
             switch (result) {
                 case MISSING_NAME -> {

@@ -59,7 +59,7 @@ public class AuthenticationFilter extends OncePerRequestFilter {
             User user = userRepository.findByUsername(username).orElse(null);
             Integer role = (user != null) ? user.getRole() : null;
 
-            request.setAttribute("requestRole",role);
+            request.setAttribute("userRole", role);
             request.setAttribute("requesterUsername", username);
             request.setAttribute("requesterId", user.get_id());
 
