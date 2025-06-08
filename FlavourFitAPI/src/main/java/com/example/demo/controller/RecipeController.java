@@ -81,8 +81,13 @@ public class RecipeController {
     // Create a Recipe
     @PostMapping
     @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<?> createRecipe(@RequestBody Recipe recipe) {
+    public ResponseEntity<?> createRecipe(@RequestBody Recipe recipe,HttpServletRequest request) {
+        String creatorId = recipe.getAuthor();
+
         try {
+            if (!authorizationUtil.verifyOwnershipOrAdmin(request, creatorId)) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Access denied");
+            }
             recipeService.createRecipe(recipe);
             return ResponseEntity.status(HttpStatus.CREATED).build();
         } catch (Exception e) {
