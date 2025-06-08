@@ -87,12 +87,12 @@ public class RecipeController {
         String creatorId = recipe.getAuthor();
 
         try {
-            /*
+
             if (!authorizationUtil.verifyOwnershipOrAdmin(request, creatorId)) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Access denied");
             }
 
-             */
+
             recipeService.createRecipe(recipe);
             return ResponseEntity.status(HttpStatus.CREATED).build();
         } catch (Exception e) {
@@ -116,12 +116,12 @@ public class RecipeController {
 
         try
         {
-            /*
+
             boolean authorized = authorizationUtil.verifyOwnershipOrAdmin(request, recipe.getAuthor_id());
             if(!authorized)
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorMessage("No access to delete recipe"));
 
-             */
+
             recipeService.deleteRecipe(id);
             return ResponseEntity.ok(new GenericOkMessage("Recipe successfully deleted"));
         } catch (Exception e) {
@@ -143,12 +143,12 @@ public class RecipeController {
 
         Recipe recipe = recipeOpt.get();
         try {
-            /*
+
             boolean authorized = authorizationUtil.verifyOwnershipOrAdmin(request, recipe.getAuthor_id());
             if(!authorized)
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorMessage("No access to update recipe"));
 
-             */
+
             recipeService.updateRecipe(id, updatedRecipe);
             return ResponseEntity.ok((new GenericOkMessage("Recipe successfully updated")));
         } catch (Exception e) {

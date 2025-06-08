@@ -58,12 +58,6 @@ public interface RecipeRepository extends MongoRepository<Recipe, String>
     })
     List<RecipeCountByTag> countRecipesByTag();
 
-    @Aggregation(pipeline = {
-            "{ $project: { name: 1, ingredientCount: { $size: '$ingredient' } } }",
-            "{ $sort: { ingredientCount: -1 } }",
-            "{ $limit: 10 }"
-    })
-    List<RecipeWithIngredientCount> findTopRecipesByIngredientCount();
 
     @Aggregation(pipeline = {
             "{ $unwind: '$tags' }",

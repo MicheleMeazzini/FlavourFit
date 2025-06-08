@@ -126,13 +126,13 @@ public class UserController {
     public ResponseEntity<?> UpdateUser(@RequestBody User user, @PathVariable String id, HttpServletRequest request) throws Exception {
         try {
             user.set_id(id);
-        /*
+
         boolean authorized = authorizationUtil.verifyOwnershipOrAdmin(request, id);
         if (!authorized) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(new ErrorMessage("No access to update user"));
         }
-        */
+
 
             Enumerators.UserError result = userService.UpdateUser(user);
             switch (result) {
@@ -211,11 +211,11 @@ public class UserController {
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> deleteUser(@PathVariable String id, HttpServletRequest request) throws Exception{
         try{
-/*
+
             boolean authorized = authorizationUtil.verifyOwnershipOrAdmin(request, id);
             if(!authorized)
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorMessage("No access to delete user"));
-*/
+
             userService.DeleteUser(id);
             return ResponseEntity.ok(new GenericOkMessage("User successfully deleted"));
         }

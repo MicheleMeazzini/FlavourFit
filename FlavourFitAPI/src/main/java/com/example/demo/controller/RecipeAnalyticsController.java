@@ -51,16 +51,6 @@ public class RecipeAnalyticsController {
         return ResponseEntity.ok(data);
     }
 
-    @GetMapping("/most-ingredients")
-    @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<?> getRecipesWithMostIngredients() {
-        var data = recipeRepository.findTopRecipesByIngredientCount();
-        if (data.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(new ErrorMessage("Nessuna ricetta trovata."));
-        }
-        return ResponseEntity.ok(data);
-    }
 
     @GetMapping("/average-minutes-by-tag")
     @SecurityRequirement(name = "bearerAuth")
