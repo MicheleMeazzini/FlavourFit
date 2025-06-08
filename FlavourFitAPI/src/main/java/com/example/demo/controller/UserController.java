@@ -69,6 +69,18 @@ public class UserController {
         }
     }
 
+    @GetMapping("/search/{partialName}")
+    @SecurityRequirement(name = "bearerAuth")
+    public ResponseEntity<?> searchUserNodes(@PathVariable String partialName) {
+        try {
+            List<UserNode> users = userService.searchUserNodesByPartialName(partialName);
+            return ResponseEntity.ok(users);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error during Neo4j user search: " + e.getMessage());
+        }
+    }
+
     // Create a User
     @PostMapping()
     @SecurityRequirement(name = "bearerAuth")

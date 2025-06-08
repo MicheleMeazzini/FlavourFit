@@ -56,6 +56,13 @@ public class UserService {
          return userRepository.findById(id);
     }
 
+    public List<UserNode> searchUserNodesByPartialName(String partialName) {
+        if (partialName == null || partialName.trim().isEmpty()) {
+            throw new IllegalArgumentException("Search term cannot be empty");
+        }
+        return userNodeRepository.findUserNodesByPartialName(partialName);
+    }
+
     public Optional<User> GetUserByUsername(String username) throws Exception {
         return userRepository.findByUsername(username);
     }

@@ -57,11 +57,37 @@ public class RecipeController {
         }
     }
 
+    @GetMapping("/search/{partialName}")
+    @SecurityRequirement(name = "bearerAuth")
+    public ResponseEntity<?> searchRecipeNodes(@PathVariable String partialName) {
+        try {
+            List<RecipeNode> recipes = recipeService.searchRecipeNodesByPartialName(partialName);
+            return ResponseEntity.ok(recipes);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid input: " + e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Search failed: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/tag/{tag}")
+    @SecurityRequirement(name = "bearerAuth")
+    public ResponseEntity<List<Recipe>> getRecipesByTag(@PathVariable String tag) {
+        System.out.println(">>> Received request for tag: " + tag);
+        List<Recipe> recipes = recipeService.findRecipesByTag(tag);
+        return ResponseEntity.ok(recipes);
+    }
+
     // Create a Recipe
     @PostMapping
     @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<?> createRecipe(@RequestBody Recipe recipe) {
+    public ResponseEntity<?> createRecipe(@RequestBody Recipe recipe,HttpServletRequest request) {
+        String creatorId = recipe.getAuthor();
+
         try {
+            if (!authorizationUtil.verifyOwnershipOrAdmin(request, creatorId)) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Access denied");
+            }
             recipeService.createRecipe(recipe);
             return ResponseEntity.status(HttpStatus.CREATED).build();
         } catch (Exception e) {

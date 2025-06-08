@@ -2,9 +2,7 @@ package com.example.demo.service;
 
 import com.example.demo.model.document.Interaction;
 import com.example.demo.model.document.Recipe;
-import com.example.demo.model.document.User;
 import com.example.demo.model.graph.RecipeNode;
-import com.example.demo.model.graph.UserNode;
 import com.example.demo.repository.document.InteractionRepository;
 import com.example.demo.repository.document.RecipeRepository;
 import com.example.demo.repository.graph.RecipeNodeRepository;
