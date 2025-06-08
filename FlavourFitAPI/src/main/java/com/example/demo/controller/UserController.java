@@ -34,14 +34,15 @@ public class UserController {
         this.authorizationUtil = authorizationUtil;
     }
 
-
-   /* @GetMapping("/check-role")
+    /*
+    @GetMapping("/check-role")
     public ResponseEntity<String> checkRole(HttpServletRequest request) {
         Integer role = (Integer) request.getAttribute("userRole");
         boolean isAdmin = role != null && role == 1;
 
         return ResponseEntity.ok(isAdmin ? "Sei un admin" : "Utente normale");
-    }*/
+    }
+    */
 
     // Read All Users
     @GetMapping()
@@ -224,7 +225,7 @@ public class UserController {
         }
     }
 
-    @PostMapping("/{followerId}/follow/{followeeId}")
+    @PostMapping("/follow/{followerId}/{followeeId}")
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> followUser(@PathVariable String followerId, @PathVariable String followeeId) {
         try {
@@ -236,7 +237,7 @@ public class UserController {
         }
     }
 
-    @DeleteMapping("/{followerId}/unfollow/{followeeId}")
+    @DeleteMapping("/unfollow/{followerId}/{followeeId}")
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> unfollowUser(@PathVariable String followerId, @PathVariable String followeeId) {
         try {
@@ -247,7 +248,7 @@ public class UserController {
         }
     }
 
-    @PostMapping("/{userId}/like/{recipeId}")
+    @PostMapping("/like/{userId}/{recipeId}")
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> likeRecipe(@PathVariable String recipeId, @PathVariable String userId) {
         try {
@@ -258,7 +259,7 @@ public class UserController {
         }
     }
 
-    @DeleteMapping("/{userId}/unlike/{recipeId}")
+    @DeleteMapping("/unlike/{userId}/{recipeId}")
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> unlikeRecipe(@PathVariable String recipeId, @PathVariable String userId) {
         try {
@@ -269,7 +270,7 @@ public class UserController {
         }
     }
 
-    @GetMapping("/{userId}/suggested-follows")
+    @GetMapping("/suggested-follows/{userId}")
     @SecurityRequirement(name = "bearerAuth")
     public List<UserNode> suggestFollows(@PathVariable String userId) {
         return userService.suggestUsersToFollow(userId);

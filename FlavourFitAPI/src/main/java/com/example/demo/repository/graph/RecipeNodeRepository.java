@@ -23,9 +23,8 @@ public interface RecipeNodeRepository extends Neo4jRepository<RecipeNode, String
     @Query("MATCH (r:Recipe {id: $id}) RETURN r")
     Optional<RecipeNode> findRecipeNodeById(String id);
 
-    /* typical “on-graph” queries */
     @Query("MATCH (u:User {id: $userId})-[:CREATED]->(r:Recipe) RETURN r")
-    List<RecipeNode> findRecipesCreatedByUser(String userId);
+    List<RecipeNode> findRecipesCreatedByUser(String userId); // for Home page
 
     @Query("""
            MATCH (me:User {id: $userId})-[:FOLLOWS]->(:User)-[:LIKES]->(r:Recipe)
@@ -38,5 +37,5 @@ public interface RecipeNodeRepository extends Neo4jRepository<RecipeNode, String
             RETURN r,COUNT(*) as A
             ORDER BY A DESC LIMIT 50
            """)
-    List<RecipeNode> findMostLikedRecipes();
+    List<RecipeNode> findMostLikedRecipes(); // for Community page
 }

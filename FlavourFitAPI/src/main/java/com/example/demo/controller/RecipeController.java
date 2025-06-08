@@ -33,7 +33,7 @@ public class RecipeController {
     }
 
      // Read All Recipes
-     @GetMapping("/all")
+     @GetMapping()
      @SecurityRequirement(name = "bearerAuth")
      public ResponseEntity<?> getRecipe() {
          try {
@@ -45,7 +45,7 @@ public class RecipeController {
      }
 
     // Read Recipe By ID
-    @GetMapping("/id/{id}")
+    @GetMapping("/{id}")
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> getRecipeById(@PathVariable String id) {
         try {
@@ -97,7 +97,7 @@ public class RecipeController {
     }
 
 
-    @PutMapping("/id/{id}")
+    @PutMapping("/{id}")
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> updateRecipe(@PathVariable String id, @RequestBody Recipe updatedRecipe,HttpServletRequest request) throws Exception {
         Optional<Recipe> recipeOpt = recipeService.getRecipeById(id);
@@ -156,8 +156,6 @@ public class RecipeController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorMessage(e.getMessage()));
         }
     }
-
-
 
     @GetMapping("/created-by/{userId}")
     @SecurityRequirement(name = "bearerAuth")
