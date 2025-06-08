@@ -1,6 +1,7 @@
 package com.example.demo.model.graph;
 
 import lombok.Data;
+import org.springframework.data.annotation.Version;
 import org.springframework.data.convert.ReadingConverter;
 import org.springframework.data.neo4j.core.schema.Id;
 import org.springframework.data.neo4j.core.schema.Node;
@@ -19,6 +20,8 @@ public class UserNode {
     @Property("id")
     private String id;
     private String name;
+    @Version
+    private Long version;
 
     @Relationship(type = "FOLLOWS", direction = Relationship.Direction.OUTGOING)
     private List<UserNode> followedUsers = new ArrayList<>();

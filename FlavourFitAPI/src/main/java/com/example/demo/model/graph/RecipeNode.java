@@ -1,6 +1,7 @@
 package com.example.demo.model.graph;
 
 import lombok.Data;
+import org.springframework.data.annotation.Version;
 import org.springframework.data.neo4j.core.schema.Id;
 import org.springframework.data.neo4j.core.schema.Node;
 import org.springframework.data.neo4j.core.schema.Property;
@@ -15,4 +16,6 @@ public class RecipeNode {
     private String id;
     private String name;
     private Date date;
+    @Version
+    private Long version;
 }

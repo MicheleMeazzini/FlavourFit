@@ -5,6 +5,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
+import java.util.Date;
 import java.util.List;
 
 @Data
@@ -27,6 +28,7 @@ public class Recipe
     private String author_id;
     @Field("author_name")
     private String author;
+    private Date date;
 
     @Data
     public static class Ingredient

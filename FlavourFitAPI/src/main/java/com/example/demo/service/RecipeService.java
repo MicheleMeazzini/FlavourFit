@@ -143,20 +143,19 @@ public class RecipeService {
 
     @Transactional
     public Recipe createRecipe(Recipe recipe) throws Exception {
+        Date now = new Date();
+        recipe.setDate(now);
+
         Recipe savedRecipe = recipeRepository.save(recipe);
 
         RecipeNode recipeNode = new RecipeNode();
         recipeNode.setId(savedRecipe.get_id());
         recipeNode.setName(savedRecipe.getName());
+        recipeNode.setDate(now);
+
         recipeNodeRepository.save(recipeNode);
 
-        String authorUsername = savedRecipe.getAuthor();
-        var userNodeOpt = userNodeRepository.findUserNodeById(authorUsername);
-        if (userNodeOpt.isEmpty()) {
-            throw new Exception("Author UserNode not found in Neo4j");
-        }
-
-        recipeNodeRepository.createCreatedRelationship(authorUsername, savedRecipe.get_id());
+        recipeNodeRepository.createCreatedRelationship(savedRecipe.getAuthor_id(), savedRecipe.get_id());
 
         return savedRecipe;
     }

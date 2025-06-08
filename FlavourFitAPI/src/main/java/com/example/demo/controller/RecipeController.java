@@ -157,27 +157,7 @@ public class RecipeController {
         }
     }
 
-    @PutMapping("/{recipeId}/like/{userId}")
-    @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<?> likeRecipe(@PathVariable String recipeId, @PathVariable String userId) {
-        try {
-            userService.likeRecipe(userId, recipeId);
-            return ResponseEntity.ok().body("Recipe liked successfully");
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Failed to like recipe: " + e.getMessage());
-        }
-    }
 
-    @DeleteMapping("/{recipeId}/like/{userId}")
-    @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<?> unlikeRecipe(@PathVariable String recipeId, @PathVariable String userId) {
-        try {
-            userService.unlikeRecipe(userId, recipeId);
-            return ResponseEntity.ok().body("Recipe unliked successfully");
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Failed to unlike recipe: " + e.getMessage());
-        }
-    }
 
     @GetMapping("/created-by/{userId}")
     @SecurityRequirement(name = "bearerAuth")

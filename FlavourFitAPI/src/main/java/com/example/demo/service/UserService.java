@@ -8,6 +8,7 @@ import com.example.demo.model.graph.UserNode;
 import com.example.demo.repository.document.InteractionRepository;
 import com.example.demo.repository.document.RecipeRepository;
 import com.example.demo.repository.document.UserRepository;
+import com.example.demo.repository.graph.RecipeNodeRepository;
 import com.example.demo.repository.graph.UserNodeRepository;
 import com.example.demo.utils.Enumerators;
 import org.springframework.stereotype.Service;
@@ -21,6 +22,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final UserNodeRepository userNodeRepository;
     private final RecipeRepository recipeRepository;
+    private final RecipeNodeRepository recipeNodeRepository;
     private final InteractionRepository interactionRepository;
     private final RecipeService recipeService;
     private final InteractionService interactionService;
@@ -29,10 +31,11 @@ public class UserService {
 
 
     public UserService(UserRepository userRepository, UserNodeRepository userNodeRepository, RecipeRepository recipeRepository, RecipeService recipeService,
-                       InteractionService interactionService, InteractionRepository interactionRepository, MongoService mongoService, Neo4jService neo4jService) {
+                       InteractionService interactionService, InteractionRepository interactionRepository, MongoService mongoService, Neo4jService neo4jService, RecipeNodeRepository recipeNodeRepository) {
         this.userRepository = userRepository;
         this.userNodeRepository = userNodeRepository;
         this.recipeRepository = recipeRepository;
+        this.recipeNodeRepository = recipeNodeRepository;
         this.recipeService = recipeService;
         this.interactionService = interactionService;
         this.interactionRepository = interactionRepository;
@@ -243,10 +246,10 @@ public class UserService {
     // </editor-fold>
 
     public void likeRecipe(String userId, String recipeId) throws Exception {
-        if (userNodeRepository.findById(userId).isEmpty()) {
+        if (userNodeRepository.findUserNodeById(userId).isEmpty()) {
             throw new Exception("UserNode not found");
         }
-        if (recipeRepository.findById(recipeId).isEmpty()) {
+        if (recipeNodeRepository.findRecipeNodeById(recipeId).isEmpty()) {
             throw new Exception("Recipe not found in MongoDB");
         }
 
@@ -255,10 +258,10 @@ public class UserService {
     }
 
     public void unlikeRecipe(String userId, String recipeId) throws Exception {
-        if (userNodeRepository.findById(userId).isEmpty()) {
+        if (userNodeRepository.findUserNodeById(userId).isEmpty()) {
             throw new Exception("UserNode not found");
         }
-        if (recipeRepository.findById(recipeId).isEmpty()) {
+        if (recipeNodeRepository.findRecipeNodeById(recipeId).isEmpty()) {
             throw new Exception("Recipe not found");
         }
 
@@ -268,10 +271,10 @@ public class UserService {
 
     @Transactional
     public void followUser(String followerId, String followeeId) throws Exception {
-        if (userNodeRepository.findById(followerId).isEmpty()) {
+        if (userNodeRepository.findUserNodeById(followerId).isEmpty()) {
             throw new Exception("Follower node not found");
         }
-        if (userNodeRepository.findById(followeeId).isEmpty()) {
+        if (userNodeRepository.findUserNodeById(followeeId).isEmpty()) {
             throw new Exception("Followee node not found");
         }
 
@@ -279,8 +282,8 @@ public class UserService {
     }
 
     public void unfollowUser(String followerId, String followeeId) throws Exception {
-        Optional<UserNode> follower = userNodeRepository.findById(followerId);
-        Optional<UserNode> followee = userNodeRepository.findById(followeeId);
+        Optional<UserNode> follower = userNodeRepository.findUserNodeById(followerId);
+        Optional<UserNode> followee = userNodeRepository.findUserNodeById(followeeId);
 
         if (follower.isEmpty() || followee.isEmpty()) {
             throw new Exception("User not found");
