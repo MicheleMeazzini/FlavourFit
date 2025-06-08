@@ -21,6 +21,4 @@ public interface UserRepository extends MongoRepository<User, String> {
             "{ $sort: { _id: 1 } }"
     })
     List<UsersPerMonth> countUsersByMonth();
-
-
 }

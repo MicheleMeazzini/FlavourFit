@@ -15,6 +15,12 @@ public interface UserNodeRepository extends Neo4jRepository<UserNode, String> {
     @Query("MATCH (u:User {id: $id}) DETACH DELETE u")
     void deleteUserNodeAndRelationships(String id);
 
+    @Query("MATCH (u:User {id: $id}) RETURN u")
+    Optional<UserNode> findUserNodeById(String id);
+
+    @Query("MATCH (u:User) WHERE toLower(u.name) CONTAINS toLower($partialName) RETURN u")
+    List<UserNode> findUserNodesByPartialName(String partialName);
+
     @Query("""
         MATCH (a:User {id: $followerId}), (b:User {id: $followeeId})
         MERGE (a)-[:FOLLOWS]->(b)
@@ -39,8 +45,7 @@ public interface UserNodeRepository extends Neo4jRepository<UserNode, String> {
         """)
     void unlikeRecipe(String userId, String recipeId);
 
-    @Query("MATCH (u:User {id: $id}) RETURN u")
-    Optional<UserNode> findUserNodeById(String id);
+
 
     @Query("""
     MATCH (u:User {id: $id})-[:FOLLOWS]->(f:User)

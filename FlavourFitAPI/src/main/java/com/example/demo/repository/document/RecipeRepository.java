@@ -19,14 +19,17 @@ public interface RecipeRepository extends MongoRepository<Recipe, String>
             "{ $lookup: { from: 'interaction', localField: 'interactions', foreignField: '_id', as: 'details_interaction' } }",
             "{ $unwind: '$details_interaction' }",
             "{ $group: { _id: '$name', average_rating: { $avg: '$details_interaction.rating' }, review_number: { $sum: 1 } } }"
-
     })
     */
 
     void deleteByAuthor(String author);
     List<Recipe> getRecipeByAuthor(String author);
+
     @Query("{ 'interactions': ObjectId(?0) }")
     Optional<Recipe> findRecipeByInteractionId(String interactionId);
+
+    @Query("{ 'tags': ?0 }")
+    List<Recipe> findByTagExact(String tag);
 
     @Aggregation(pipeline = {
             "{ $sort: { createdAt: -1 } }",

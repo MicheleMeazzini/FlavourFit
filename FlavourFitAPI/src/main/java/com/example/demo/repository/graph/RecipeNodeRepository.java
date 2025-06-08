@@ -23,6 +23,9 @@ public interface RecipeNodeRepository extends Neo4jRepository<RecipeNode, String
     @Query("MATCH (r:Recipe {id: $id}) RETURN r")
     Optional<RecipeNode> findRecipeNodeById(String id);
 
+    @Query("MATCH (r:Recipe) WHERE toLower(r.name) CONTAINS toLower($partialName) RETURN r")
+    List<RecipeNode> findRecipeNodesByPartialName(String partialName);
+
     @Query("MATCH (u:User {id: $userId})-[:CREATED]->(r:Recipe) RETURN r")
     List<RecipeNode> findRecipesCreatedByUser(String userId); // for Home page
 

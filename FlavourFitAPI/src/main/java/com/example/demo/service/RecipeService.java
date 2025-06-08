@@ -36,6 +36,18 @@ public class RecipeService {
         return recipeRepository.findById(id);
     }
 
+    public List<Recipe> findRecipesByTag(String tag) {
+        System.out.println(">>> Searching in repository for tag: " + tag);
+        return recipeRepository.findByTagExact(tag);
+    }
+
+    public List<RecipeNode> searchRecipeNodesByPartialName(String partialName) {
+        if (partialName == null || partialName.trim().isEmpty()) {
+            throw new IllegalArgumentException("Search term cannot be empty");
+        }
+        return recipeNodeRepository.findRecipeNodesByPartialName(partialName);
+    }
+
     public void deleteRecipe(String id) throws Exception {
         if (recipeRepository.existsById(id)) {
             Recipe recipe = recipeRepository.findById(id).orElseThrow(() -> new Exception("Recipe not found"));
