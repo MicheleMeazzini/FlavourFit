@@ -19,7 +19,7 @@ public class RecipeNode {
     private String name;
     private Date date;
 
-    @Relationship(type = "CREATE", direction = Relationship.Direction.INCOMING)
+    @Relationship(type = "CREATED", direction = Relationship.Direction.INCOMING)
     private UserNode creator;
 
     @Relationship(type = "LIKES", direction = Relationship.Direction.INCOMING)

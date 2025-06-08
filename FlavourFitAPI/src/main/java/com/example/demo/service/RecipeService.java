@@ -21,18 +21,12 @@ public class RecipeService {
 
     private final RecipeRepository recipeRepository;
     private final RecipeNodeRepository recipeNodeRepository;
-    private final UserNodeRepository userNodeRepository;
-    private final InteractionRepository interactionRepository;
-    private final MongoService mongoService;
     private final Neo4jService neo4jService;
     private final RecipeServiceTransactional recipeServiceTransactional;
 
-    public RecipeService(RecipeRepository recipeRepository, InteractionRepository interactionRepository, RecipeNodeRepository recipeNodeRepository, UserNodeRepository userNodeRepository, MongoService mongoService, Neo4jService neo4jService, RecipeServiceTransactional recipeServiceTransactional) {
+    public RecipeService(RecipeRepository recipeRepository, RecipeNodeRepository recipeNodeRepository, Neo4jService neo4jService, RecipeServiceTransactional recipeServiceTransactional) {
         this.recipeRepository = recipeRepository;
         this.recipeNodeRepository = recipeNodeRepository;
-        this.interactionRepository = interactionRepository;
-        this.userNodeRepository = userNodeRepository;
-        this.mongoService = mongoService;
         this.neo4jService = neo4jService;
         this.recipeServiceTransactional = recipeServiceTransactional;
     }
@@ -95,10 +89,13 @@ public class RecipeService {
     //<editor-fold desc="Recipe Update operations">
 
     public Enumerators.RecipeError updateRecipe(String id, Recipe updatedRecipe) throws Exception {
+
         Optional<Recipe> existingRecipeOpt = recipeRepository.findById(id);
         if (existingRecipeOpt.isEmpty()) {
             return Enumerators.RecipeError.RECIPE_NOT_FOUND;
         }
+
+        updatedRecipe.set_id(id);
 
         boolean neo4jUpdateNeeded = !updatedRecipe.getName().equals(existingRecipeOpt.get().getName());
         RecipeNode backupNode = neo4jService.findRecipeWithAllRelationships(id)
@@ -116,7 +113,7 @@ public class RecipeService {
             System.out.println("Error during saving: " + e.getMessage());
             if (neo4jUpdateNeeded)
                 recipeNodeRepository.save(backupNode);
-            return Enumerators.RecipeError.GENERIC_ERROR;
+            throw e;
         }
     }
 
@@ -266,7 +263,7 @@ class RecipeServiceTransactional {
 
     //<editor-fold desc="Mongo Recipe operations">
 
-    @org.springframework.transaction.annotation.Transactional("transactionManager")
+    @Transactional("transactionManager")
     public void deleteRecipeFromMongoDb(String id) throws Exception {
         Optional<Recipe> recipeOpt = recipeRepository.findById(id);
         if (recipeOpt.isEmpty()) {
@@ -284,6 +281,7 @@ class RecipeServiceTransactional {
     public void updateRecipeInMongoDb(Recipe updatedRecipe) throws Exception {
         Optional<Recipe> existingRecipeOpt = recipeRepository.findById(updatedRecipe.get_id());
         if (existingRecipeOpt.isPresent()) {
+            //if(true) throw new RuntimeException("Simulated failure during recipe deletion"); // Simulate a failure
             recipeRepository.save(updatedRecipe);
         } else {
             throw new IllegalArgumentException("Recipe not found");

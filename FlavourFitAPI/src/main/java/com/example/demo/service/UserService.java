@@ -22,26 +22,16 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final UserNodeRepository userNodeRepository;
-    private final RecipeRepository recipeRepository;
     private final RecipeNodeRepository recipeNodeRepository;
-    private final InteractionRepository interactionRepository;
-    private final RecipeService recipeService;
-    private final InteractionService interactionService;
-    private final MongoService mongoService;
     private final Neo4jService neoj4Service;
     private final UserServiceTransactional userServiceTransactional;
 
 
-    public UserService(UserRepository userRepository, UserNodeRepository userNodeRepository, RecipeRepository recipeRepository, RecipeService recipeService,
-                       InteractionService interactionService, InteractionRepository interactionRepository, MongoService mongoService, Neo4jService neo4jService, RecipeNodeRepository recipeNodeRepository, UserServiceTransactional userServiceTransactional) {
+    public UserService(UserRepository userRepository, UserNodeRepository userNodeRepository,
+                       Neo4jService neo4jService, RecipeNodeRepository recipeNodeRepository, UserServiceTransactional userServiceTransactional) {
         this.userRepository = userRepository;
         this.userNodeRepository = userNodeRepository;
-        this.recipeRepository = recipeRepository;
         this.recipeNodeRepository = recipeNodeRepository;
-        this.recipeService = recipeService;
-        this.interactionService = interactionService;
-        this.interactionRepository = interactionRepository;
-        this.mongoService = mongoService;
         this.neoj4Service = neo4jService;
         this.userServiceTransactional = userServiceTransactional;
     }
@@ -383,7 +373,7 @@ class UserServiceTransactional {
             interaction.setAuthor(updatedUser.getUsername());
             interactionRepository.save(interaction);
         }
-        if(true) throw new RuntimeException("Simulated error during user deletion");
+        //if(true) throw new RuntimeException("Simulated error during user deletion");
         userRepository.save(updatedUser);
     }
 
