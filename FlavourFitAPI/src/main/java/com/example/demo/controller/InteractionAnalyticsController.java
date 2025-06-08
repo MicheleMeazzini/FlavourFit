@@ -2,6 +2,7 @@ package com.example.demo.controller;
 
 import com.example.demo.model.ErrorMessage;
 import com.example.demo.repository.document.InteractionRepository;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,6 +18,7 @@ public class InteractionAnalyticsController {
     }
 
     @GetMapping("/review-stats")
+    @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> getUserReviewStats() {
         var data = interactionRepository.getUserReviewStats();
         if (data.isEmpty()) {
@@ -27,6 +29,7 @@ public class InteractionAnalyticsController {
     }
 
     @GetMapping("/rating-distribution")
+    @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> getRatingDistribution() {
         var data = interactionRepository.getRatingDistribution();
         if (data.isEmpty()) {
@@ -37,6 +40,7 @@ public class InteractionAnalyticsController {
     }
 
     @GetMapping("/top-reviewers")
+    @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> getTopReviewers() {
         var data = interactionRepository.findTopReviewers();
         if (data.isEmpty()) {

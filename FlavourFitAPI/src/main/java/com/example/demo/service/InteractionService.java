@@ -32,6 +32,12 @@ public class InteractionService {
         return interactionRepository.findAll();
     }
 
+    public List<Interaction> getInteractionsByRecipeId(String recipeId) {
+        Recipe recipe = recipeRepository.findById(recipeId)
+                .orElseThrow(() -> new RuntimeException("Recipe not found with id: " + recipeId));
+        return interactionRepository.findAllById(recipe.getInteractions());
+    }
+
     public Optional<Interaction> getInteractionById(String id) {
         return interactionRepository.findById(id);
     }

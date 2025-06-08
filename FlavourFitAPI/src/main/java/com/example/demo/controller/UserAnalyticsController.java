@@ -3,6 +3,7 @@ package com.example.demo.controller;
 
 import com.example.demo.model.ErrorMessage;
 import com.example.demo.repository.document.UserRepository;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,6 +19,7 @@ public class UserAnalyticsController {
     }
 
     @GetMapping("/registrations-per-month")
+    @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> getRegistrationsPerMonth() {
         var data = userRepository.countUsersByMonth();
         if (data.isEmpty()) {

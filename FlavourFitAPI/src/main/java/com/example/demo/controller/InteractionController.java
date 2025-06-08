@@ -40,6 +40,12 @@ public class InteractionController {
         return service.getAllInteractions();
     }
 
+    @GetMapping("/recipe/{recipeId}")
+    @SecurityRequirement(name = "bearerAuth")
+    public List<Interaction> getInteractionsByRecipeId(@PathVariable String recipeId) {
+        return service.getInteractionsByRecipeId(recipeId);
+    }
+
     @GetMapping("/{id}")
     @SecurityRequirement(name = "bearerAuth")
     public Optional<Interaction> getInteractionById(@PathVariable String id) {
