@@ -5,6 +5,8 @@ FlavourFit is a Large-Scale Multi-Structured Databases project designed to store
 
 The project also features a RESTful API for interacting with the database and exposing key functionalities to users.
 
+To download the Databases dumps, please follow this link: https://drive.google.com/drive/folders/1_YDWtkv2M8a6V_ZkjSZK0VoBFoYfH3sP?usp=sharing
+
 ## 👤 Authors
 **Michele Meazzini, Angela Ungolo, Stefano Micheloni**
 ---
