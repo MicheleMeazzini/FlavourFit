@@ -55,6 +55,14 @@ public class RecipeService {
 
     //<editor-fold desc="Recipe Delete operations">
 
+    public List<RecipeNode> searchRecipeNodesByPartialName(String partialName) {
+        if (partialName == null || partialName.trim().isEmpty()) {
+            throw new IllegalArgumentException("Search term cannot be empty");
+        }
+        return recipeNodeRepository.findRecipeNodesByPartialName(partialName);
+    }
+
+
     public boolean deleteFromNeo4j(String id) {
         try {
             recipeNodeRepository.deleteRecipeNodeAndRelationships(id);
