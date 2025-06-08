@@ -88,4 +88,54 @@ public class Neo4jService {
                     return user;
                 });
     }
+
+    public Optional<RecipeNode> findRecipeWithAllRelationships(String id) {
+        String query = """
+        MATCH (r:Recipe {id: $id})
+        OPTIONAL MATCH (creator:User)-[:CREATED]->(r)
+        OPTIONAL MATCH (liker:User)-[:LIKES]->(r)
+        RETURN r, creator, collect(DISTINCT liker) AS likedBy
+    """;
+
+        return neo4jClient.query(query)
+                .bind(id).to("id")
+                .fetch()
+                .one()
+                .map(result -> {
+                    Object rRaw = result.get("r");
+                    if (!(rRaw instanceof Node rNode)) return null;
+
+                    RecipeNode recipe = new RecipeNode();
+                    recipe.setId(rNode.get("id").asString());
+                    recipe.setName(rNode.get("name").asString());
+                    // Se hai anche date, ingredienti ecc. aggiungili qui
+
+                    // CREATOR
+                    Object creatorRaw = result.get("creator");
+                    if (creatorRaw instanceof Node cNode) {
+                        UserNode creator = new UserNode();
+                        creator.setId(cNode.get("id").asString());
+                        creator.setName(cNode.get("name").asString());
+                        recipe.setCreator(creator);
+                    }
+
+                    // LIKED BY USERS
+                    List<UserNode> likedByUsers = new ArrayList<>();
+                    Object likedByRaw = result.get("likedBy");
+                    if (likedByRaw instanceof List<?> rawList) {
+                        for (Object obj : rawList) {
+                            if (obj instanceof Node likerNode) {
+                                UserNode u = new UserNode();
+                                u.setId(likerNode.get("id").asString());
+                                u.setName(likerNode.get("name").asString());
+                                likedByUsers.add(u);
+                            }
+                        }
+                    }
+
+                    recipe.setLikedBy(likedByUsers);
+                    return recipe;
+                });
+    }
+
 }

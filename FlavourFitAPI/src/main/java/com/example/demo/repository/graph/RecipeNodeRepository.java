@@ -38,4 +38,8 @@ public interface RecipeNodeRepository extends Neo4jRepository<RecipeNode, String
             ORDER BY A DESC LIMIT 50
            """)
     List<RecipeNode> findMostLikedRecipes(); // for Community page
+
+    @Query("MATCH (u:Recipe {id: $id}) DETACH DELETE u")
+    void deleteRecipeNodeAndRelationships(String id);
+
 }

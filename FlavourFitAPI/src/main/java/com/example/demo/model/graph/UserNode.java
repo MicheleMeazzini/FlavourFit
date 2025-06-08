@@ -20,8 +20,6 @@ public class UserNode {
     @Property("id")
     private String id;
     private String name;
-    @Version
-    private Long version;
 
     @Relationship(type = "FOLLOWS", direction = Relationship.Direction.OUTGOING)
     private List<UserNode> followedUsers = new ArrayList<>();

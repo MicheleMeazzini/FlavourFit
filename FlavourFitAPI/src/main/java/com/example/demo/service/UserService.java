@@ -11,6 +11,7 @@ import com.example.demo.repository.document.UserRepository;
 import com.example.demo.repository.graph.RecipeNodeRepository;
 import com.example.demo.repository.graph.UserNodeRepository;
 import com.example.demo.utils.Enumerators;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,10 +29,11 @@ public class UserService {
     private final InteractionService interactionService;
     private final MongoService mongoService;
     private final Neo4jService neoj4Service;
+    private final UserServiceTransactional userServiceTransactional;
 
 
     public UserService(UserRepository userRepository, UserNodeRepository userNodeRepository, RecipeRepository recipeRepository, RecipeService recipeService,
-                       InteractionService interactionService, InteractionRepository interactionRepository, MongoService mongoService, Neo4jService neo4jService, RecipeNodeRepository recipeNodeRepository) {
+                       InteractionService interactionService, InteractionRepository interactionRepository, MongoService mongoService, Neo4jService neo4jService, RecipeNodeRepository recipeNodeRepository, UserServiceTransactional userServiceTransactional) {
         this.userRepository = userRepository;
         this.userNodeRepository = userNodeRepository;
         this.recipeRepository = recipeRepository;
@@ -41,6 +43,7 @@ public class UserService {
         this.interactionRepository = interactionRepository;
         this.mongoService = mongoService;
         this.neoj4Service = neo4jService;
+        this.userServiceTransactional = userServiceTransactional;
     }
 
     // <editor-fold desc="Get User Operations">
@@ -98,6 +101,7 @@ public class UserService {
 
 
     }
+
     // </editor-fold>
 
     // <editor-fold desc="Update User Operations">
@@ -125,7 +129,7 @@ public class UserService {
             userNodeRepository.save(newNode);
         }
         try {
-            mongoService.updateUserInMongoDb(user, exist.get().getUsername());
+            userServiceTransactional.updateUserInMongoDb(user, exist.get().getUsername());
         } catch (Exception e) {
             // Rollback in caso di errore
             if(neo4jUpdateNeeded)
@@ -192,7 +196,7 @@ public class UserService {
             userNodeRepository.save(newNode);
         }
         try {
-            mongoService.updateUserInMongoDb(usr, oldUsername);
+            userServiceTransactional.updateUserInMongoDb(usr, oldUsername);
         } catch (Exception e) {
             // Rollback in caso di errore
             if(neo4jUpdateNeeded)
@@ -232,7 +236,7 @@ public class UserService {
 
         }
         try {
-            mongoService.deleteUserFromMongoDb(id);
+            userServiceTransactional.deleteUserFromMongoDb(id);
         }
         catch(Exception e)
         {
@@ -244,6 +248,8 @@ public class UserService {
     }
 
     // </editor-fold>
+
+    //<editor-fold desc="Graph Operations">
 
     public void likeRecipe(String userId, String recipeId) throws Exception {
         if (userNodeRepository.findUserNodeById(userId).isEmpty()) {
@@ -300,6 +306,81 @@ public class UserService {
         return userNodeRepository.findMostFollowedUsers();
     }
 
+
+    // </editor-fold>
+}
+
+@Component
+class UserServiceTransactional {
+
+    private final UserRepository userRepository;
+    private final RecipeRepository recipeRepository;
+    private final InteractionRepository interactionRepository;
+
+    UserServiceTransactional(UserRepository userRepository, RecipeRepository recipeRepository, InteractionRepository interactionRepository) {
+        this.userRepository = userRepository;
+        this.recipeRepository = recipeRepository;
+        this.interactionRepository = interactionRepository;
+    }
+    //<editor-fold desc="Mongo User Transactional operations">
+
+    @Transactional("transactionManager")
+    public void deleteUserFromMongoDb(String id) throws Exception {
+        Optional<User> userOpt = userRepository.findById(id);
+        if (userOpt.isEmpty()) {
+            throw new IllegalArgumentException("User not found");
+        }
+
+        User user = userOpt.get();
+        String username = user.getUsername();
+
+        List<Recipe> recipes = recipeRepository.getRecipeByAuthor(username);
+
+        List<Interaction> recipeInteractions = new ArrayList<>();
+
+        for (Recipe recipe : recipes) {
+            List<String> interactionIds = recipe.getInteractions();
+            /*
+            for(String interaction : interactionIds) {
+                Optional<Interaction> interactionOpt = interactionRepository.findById(interaction);
+                interactionOpt.ifPresent(recipeInteractions::add);
+            }
+            */
+             recipeInteractions.addAll(
+                    interactionRepository.findAllById(recipe.getInteractions()));
+        }
+        ;
+        List<Interaction> interactions = interactionRepository.getInteractionByAuthor(username);
+        interactionRepository.deleteAll(interactions);
+        interactionRepository.deleteAll(recipeInteractions);
+        recipeRepository.deleteAll(recipes);
+
+        // Simula timeout/errore
+        // Thread.sleep(70000); // oppure:
+        //if(true) throw new RuntimeException("Simulated error during user deletion");
+        userRepository.deleteById(id);
+
+    }
+
+    @Transactional("transactionManager")
+    public void updateUserInMongoDb(User updatedUser, String oldUsername) {
+
+        List<Recipe> recipes = recipeRepository.getRecipeByAuthor(oldUsername);
+        for (Recipe recipe : recipes) {
+            recipe.setAuthor(updatedUser.getUsername());
+            recipeRepository.save(recipe);
+        }
+
+        List<Interaction> interactions = interactionRepository.getInteractionByAuthor(oldUsername);
+        for (Interaction interaction : interactions) {
+            interaction.setAuthor(updatedUser.getUsername());
+            interactionRepository.save(interaction);
+        }
+        if(true) throw new RuntimeException("Simulated error during user deletion");
+        userRepository.save(updatedUser);
+    }
+
+    //</editor-fold>
 }
 
 

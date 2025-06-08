@@ -85,9 +85,12 @@ public class RecipeController {
 
         try
         {
+            /*
             boolean authorized = authorizationUtil.verifyOwnershipOrAdmin(request, recipe.getAuthor_id());
             if(!authorized)
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorMessage("No access to delete recipe"));
+
+             */
             recipeService.deleteRecipe(id);
             return ResponseEntity.ok(new GenericOkMessage("Recipe successfully deleted"));
         } catch (Exception e) {

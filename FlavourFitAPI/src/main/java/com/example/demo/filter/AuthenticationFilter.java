@@ -35,7 +35,7 @@ public class AuthenticationFilter extends OncePerRequestFilter {
                                     FilterChain filterChain) throws ServletException, IOException {
 
         // da togliere la ||
-        if (!request.getRequestURI().startsWith("/api") ) {
+        if (!request.getRequestURI().startsWith("/api") || request.getRequestURI().startsWith("/api") ) {
             filterChain.doFilter(request, response);
             return;
         }
