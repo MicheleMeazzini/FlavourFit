@@ -9,6 +9,7 @@ import com.example.demo.repository.document.InteractionRepository;
 import com.example.demo.repository.document.RecipeRepository;
 import com.example.demo.utils.Enumerators;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
@@ -35,6 +36,7 @@ public class InteractionService {
         return interactionRepository.findById(id);
     }
 
+    @Transactional
     public Interaction createInteraction(CreateInteractionInput createInteractionInput) {
         Interaction interaction = new Interaction();
 
@@ -50,6 +52,7 @@ public class InteractionService {
         return savedInteraction;
     }
 
+    @Transactional
     public Interaction updateInteraction(String id, Interaction updatedInteraction) {
         return interactionRepository.findById(id).map(interaction -> {
             interaction.setReview(updatedInteraction.getReview());
@@ -60,6 +63,7 @@ public class InteractionService {
         }).orElse(null);
     }
 
+    @Transactional
     public Enumerators.InteractionError patchInteraction(String id, Map<String, Object> params) {
         Optional<Interaction> interactionOpt = interactionRepository.findById(id);
         if (interactionOpt.isEmpty()) {
@@ -108,6 +112,7 @@ public class InteractionService {
         }
     }
 
+    @Transactional
     public void deleteInteraction(String id) throws Exception {
         Optional<Recipe> recipe = recipeRepository.findRecipeByInteractionId(id);
 

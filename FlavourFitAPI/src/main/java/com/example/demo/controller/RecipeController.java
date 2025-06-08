@@ -72,9 +72,11 @@ public class RecipeController {
 
     @GetMapping("/tag/{tag}")
     @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<List<Recipe>> getRecipesByTag(@PathVariable String tag) {
-        System.out.println(">>> Received request for tag: " + tag);
-        List<Recipe> recipes = recipeService.findRecipesByTag(tag);
+    public ResponseEntity<List<Recipe>> getRecipesByTag(
+            @PathVariable String tag,
+            @RequestParam(defaultValue = "50") int limit) {
+
+        List<Recipe> recipes = recipeService.findRecipesByTag(tag, limit);
         return ResponseEntity.ok(recipes);
     }
 

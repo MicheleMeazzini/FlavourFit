@@ -11,6 +11,7 @@ import com.example.demo.utils.Enumerators;
 import com.mongodb.DuplicateKeyException;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -47,6 +48,10 @@ public class RecipeService {
     }
 
     //</editor-fold>
+    public List<Recipe> findRecipesByTag(String tag, int limit) {
+        PageRequest pageRequest = PageRequest.of(0, limit);
+        return recipeRepository.findByTags(tag, pageRequest);
+    }
 
     //<editor-fold desc="Recipe Delete operations">
 

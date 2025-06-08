@@ -45,8 +45,6 @@ public interface UserNodeRepository extends Neo4jRepository<UserNode, String> {
         """)
     void unlikeRecipe(String userId, String recipeId);
 
-
-
     @Query("""
     MATCH (u:User {id: $id})-[:FOLLOWS]->(f:User)
     RETURN f

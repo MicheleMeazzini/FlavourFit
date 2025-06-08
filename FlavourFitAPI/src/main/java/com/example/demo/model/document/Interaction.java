@@ -9,7 +9,6 @@ import java.util.Date;
 @Data
 @Document(collection = "interaction")
 public class Interaction {
-
     @Id
     private String _id;
     private String review;

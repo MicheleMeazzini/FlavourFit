@@ -8,9 +8,7 @@ import java.util.Date;
 
 @Data
 @Document(collection = "user")
-
 public class User {
-
     @Id
     private String _id;
     private String username;
@@ -18,5 +16,4 @@ public class User {
     private String hashed_password;
     private Date registration_date;
     private int role;
-
 }

@@ -6,6 +6,7 @@ import org.springframework.data.mongodb.repository.Aggregation;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
 import org.springframework.stereotype.Repository;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.Optional;
@@ -29,7 +30,7 @@ public interface RecipeRepository extends MongoRepository<Recipe, String>
     Optional<Recipe> findRecipeByInteractionId(String interactionId);
 
     @Query("{ 'tags': ?0 }")
-    List<Recipe> findByTagExact(String tag);
+    List<Recipe> findByTags(String tag, Pageable pageable);
 
     @Aggregation(pipeline = {
             "{ $sort: { createdAt: -1 } }",
